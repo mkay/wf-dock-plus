@@ -1,3 +1,5 @@
+#pragma once
+
 #include <map>
 #include <vector>
 #include <string>
@@ -17,6 +19,15 @@ const std::map<double, std::vector<std::string>> volume_icons = {
     {0.33, {"audio-volume-low"}},
     {0.66, {"audio-volume-medium"}},
     {1.0, {"audio-volume-high"}},
+    {std::numeric_limits<double>::max(), {"audio-volume-high-danger", "dialog-warning"}}
+};
+
+const std::map<double, std::vector<std::string>> mic_volume_icons = {
+    {std::numeric_limits<double>::min(), {"emblem-unreadable"}},
+    {0.0, {"microphone-sensitivity-muted", "audio-volume-muted"}},
+    {0.33, {"microphone-sensitivity-low", "audio-volume-low"}},
+    {0.66, {"microphone-sensitivity-medium", "audio-volume-medium"}},
+    {1.0, {"microphone-sensitivity-high", "audio-volume-high"}},
     {std::numeric_limits<double>::max(), {"audio-volume-high-danger", "dialog-warning"}}
 };
 
