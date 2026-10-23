@@ -115,6 +115,17 @@ Glib::RefPtr<Gio::Icon> get_from_desktop_app_info(std::string app_id)
         }
     }
 
+    /* Apps whose app_id differs from their desktop file name, e.g. browser web apps,
+     * declare it as StartupWMClass */
+    for (auto& info : Gio::AppInfo::get_all())
+    {
+        auto desktop_info = std::dynamic_pointer_cast<Gio::DesktopAppInfo>(info);
+        if (desktop_info && (tolower(desktop_info->get_startup_wm_class()) == tolower(app_id)))
+        {
+            return desktop_info->get_icon();
+        }
+    }
+
     return {};
 }
 
@@ -162,7 +173,8 @@ bool image_set_icon(Gtk::Image & image, Glib::ustring path)
             auto icon = get_from_desktop_app_info(app_id);
             if (icon)
             {
-                image.set_from_icon_name(icon->to_string());
+                /* Handles both themed icons and icon files */
+                image.set(icon);
                 return true;
             }
         }

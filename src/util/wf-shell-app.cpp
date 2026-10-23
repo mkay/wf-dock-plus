@@ -133,12 +133,17 @@ static void do_reload_css(WayfireShellApp *app)
     app->on_css_reload();
 }
 
-/* Reload file and add next inotify watch */
+/* Reload file and add next inotify watch
+ * The watch follows the inode, so it has to be renewed after editors and WCM
+ * replace the file by renaming a new one over it. */
 static void do_reload_config(WayfireShellApp *app)
 {
     wf::config::load_configuration_options_from_file(
         app->config, app->get_config_file());
     app->on_config_reload();
+    inotify_add_watch(app->inotify_fd,
+        app->get_config_file().c_str(),
+        IN_CLOSE_WRITE);
 }
 
 /* Handle inotify event */
@@ -217,9 +222,6 @@ void WayfireShellApp::on_activate()
     inotify_css_fd = inotify_init();
     do_reload_css(this);
 
-    inotify_add_watch(inotify_fd,
-        get_config_file().c_str(),
-        IN_CLOSE_WRITE);
     inotify_add_watch(inotify_css_fd,
         get_css_config_dir().c_str(),
         IN_CREATE | IN_MODIFY | IN_DELETE | IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE);
