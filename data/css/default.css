@@ -180,6 +180,13 @@ text-shadow: 1px  1px 0 var(--bcol),
     border-radius: 1em;
 }
 
+.wf-dock .dock-separator {
+    background-color: alpha(white, 0.25);
+    min-width: 1px;
+    min-height: 1px;
+    margin: 0.75em 0.5em;
+}
+
 .wf-dock button {
     background: transparent;
     padding-left: 0rem;

@@ -96,6 +96,14 @@ void WfDockApp::handle_output_removed(WayfireOutput *output)
     priv->docks.erase(output);
 }
 
+void WfDockApp::on_config_reload()
+{
+    for (auto& dock : priv->docks)
+    {
+        dock.second->handle_config_reload();
+    }
+}
+
 WfDock*WfDockApp::dock_for_wl_output(wl_output *output)
 {
     for (auto& dock : priv->docks)

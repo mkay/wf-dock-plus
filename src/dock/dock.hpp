@@ -16,6 +16,7 @@ class WfDock
 
     void add_child(Gtk::Widget& widget);
     void rem_child(Gtk::Widget& widget);
+    void handle_config_reload();
 
     wl_surface *get_wl_surface();
     class impl;
@@ -44,6 +45,7 @@ class WfDockApp : public WayfireShellApp
     void on_activate() override;
     void handle_new_output(WayfireOutput *output) override;
     void handle_output_removed(WayfireOutput *output) override;
+    void on_config_reload() override;
 
   private:
     WfDockApp();

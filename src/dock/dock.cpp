@@ -9,8 +9,10 @@
 #include <wf-autohide-window.hpp>
 
 #include "dock.hpp"
+#include "launchers.hpp"
 #include "../util/gtk-utils.hpp"
 #include "gtkmm/flowbox.h"
+#include "gtkmm/separator.h"
 #include "network/manager.hpp"
 #include "network/network-widget.hpp"
 #include "network/network.hpp"
@@ -23,6 +25,9 @@ class WfDock::impl
     WayfireOutput *output;
     std::unique_ptr<WayfireAutohidingWindow> window;
     wl_surface *_wl_surface;
+    Gtk::Box layout;
+    WfDockLaunchers launchers;
+    Gtk::Separator separator;
     Gtk::FlowBox box;
     std::unique_ptr<WayfireMenuWidget> network_image;
     std::unique_ptr<NetworkControlWidget> network_control;
@@ -45,10 +50,18 @@ class WfDock::impl
         window->set_auto_exclusive_zone(false);
         gtk_layer_set_layer(window->gobj(), GTK_LAYER_SHELL_LAYER_TOP);
 
-        box.add_css_class("box");
+        /* "box" is the visible dock background, so it wraps launchers too */
+        layout.add_css_class("box");
+        box.add_css_class("toplevels");
+        box.set_selection_mode(Gtk::SelectionMode::NONE);
+        separator.add_css_class("dock-separator");
+        layout.append(launchers.get_widget());
+        layout.append(separator);
+        layout.append(box);
+        update_separator();
 
         window->add_css_class("wf-dock");
-        window->set_child(box);
+        window->set_child(layout);
 
         if (css_path.value() != "")
         {
@@ -87,6 +100,13 @@ class WfDock::impl
 
         auto update_position = [=] ()
         {
+            bool vertical = position.value() == "left" || position.value() == "right";
+            auto main_axis  = vertical ? Gtk::Orientation::VERTICAL : Gtk::Orientation::HORIZONTAL;
+            auto cross_axis = vertical ? Gtk::Orientation::HORIZONTAL : Gtk::Orientation::VERTICAL;
+            layout.set_orientation(main_axis);
+            launchers.set_orientation(main_axis);
+            separator.set_orientation(cross_axis);
+
             if (position.value() == "bottom")
             {
                 // this is not great, but we lack better options without doing a
@@ -114,12 +134,26 @@ class WfDock::impl
     void add_child(Gtk::Widget& widget)
     {
         box.append(widget);
+        update_separator();
     }
 
     void rem_child(Gtk::Widget& widget)
     {
         box.remove(widget);
+        update_separator();
         window->set_default_size(width, height);
+    }
+
+    void handle_config_reload()
+    {
+        launchers.reload();
+        update_separator();
+    }
+
+    /* Only separate launchers from running apps when both are present */
+    void update_separator()
+    {
+        separator.set_visible(!launchers.empty() && box.get_first_child());
     }
 
     wl_surface *get_wl_surface()
@@ -132,7 +166,7 @@ class WfDock::impl
     void set_clickable_region()
     {
         auto surface = window->get_surface();
-        auto widget_bounds = box.compute_bounds(*window);
+        auto widget_bounds = layout.compute_bounds(*window);
 
         auto rect = Cairo::RectangleInt{
             (int)widget_bounds->get_x(),
@@ -160,6 +194,11 @@ void WfDock::add_child(Gtk::Widget& w)
 void WfDock::rem_child(Gtk::Widget& w)
 {
     return pimpl->rem_child(w);
+}
+
+void WfDock::handle_config_reload()
+{
+    return pimpl->handle_config_reload();
 }
 
 wl_surface*WfDock::get_wl_surface()

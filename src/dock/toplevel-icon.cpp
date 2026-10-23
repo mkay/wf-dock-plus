@@ -38,6 +38,7 @@ class WfToplevelIcon::impl
         button.set_tooltip_text("none");
         button.add_css_class("flat");
         button.add_css_class("toplevel-icon");
+        button.set_focusable(false);
 
         button.signal_clicked().connect(
             sigc::mem_fun(*this, &WfToplevelIcon::impl::on_clicked));

@@ -93,5 +93,26 @@
 			<_long>Keep all window icons for up to 2 seconds to allow CSS animations.</_long>
 			<default>true</default>
 		</option>
+		<option name="launchers" type="string">
+			<_short>Launchers</_short>
+			<_long>Space-separated list of applications pinned to the left of the running apps, in order. Each entry is a desktop file id (with or without .desktop), an absolute path to a .desktop file, or a name defined with launcher_cmd_&lt;name&gt;.</_long>
+			<default></default>
+		</option>
+		<option name="custom_launchers" type="dynamic-list" type-hint="dict">
+			<_short>Custom launchers</_short>
+			<_long>Commands for launchers which have no desktop file. Reference them by name in the launchers option.</_long>
+			<entry prefix="launcher_cmd_" type="string" name="cmd">
+				<_short>Command</_short>
+				<hint>file</hint>
+			</entry>
+			<entry prefix="launcher_icon_" type="string" name="icon">
+				<_short>Icon</_short>
+				<default></default>
+			</entry>
+			<entry prefix="launcher_label_" type="string" name="label">
+				<_short>Label</_short>
+				<default></default>
+			</entry>
+		</option>
 	</plugin>
 </wf-shell>
