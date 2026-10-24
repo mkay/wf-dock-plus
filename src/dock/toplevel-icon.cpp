@@ -5,6 +5,7 @@
 
 #include <gdkmm/display.h>
 #include <gdkmm/seat.h>
+#include <giomm/desktopappinfo.h>
 #include <gdk/wayland/gdkwayland.h>
 
 #include "dock.hpp"
@@ -12,7 +13,48 @@
 #include "toplevel-icon.hpp"
 #include "gtk-utils.hpp"
 #include <cassert>
+#include <cctype>
 #include "wf-option-wrap.hpp"
+
+/* Icon declared by the app's .desktop file, matched by desktop id or StartupWMClass.
+ * IconProvider::image_set_icon() prefers a theme icon named like the app_id, which
+ * overrides the .desktop Icon= and makes running apps differ from their launchers. */
+static Glib::RefPtr<Gio::Icon> desktop_icon_for_app_id(const std::string & app_id)
+{
+    auto lower = [] (std::string str)
+    {
+        for (auto & c : str)
+        {
+            c = std::tolower((unsigned char)c);
+        }
+
+        return str;
+    };
+
+    for (auto & id : {app_id, lower(app_id)})
+    {
+        for (auto & suffix : {"", ".desktop"})
+        {
+            auto info = Gio::DesktopAppInfo::create(id + suffix);
+            if (info && info->get_icon())
+            {
+                return info->get_icon();
+            }
+        }
+    }
+
+    for (auto & info : Gio::AppInfo::get_all())
+    {
+        auto desktop_info = std::dynamic_pointer_cast<Gio::DesktopAppInfo>(info);
+        if (desktop_info && desktop_info->get_icon() &&
+            (lower(desktop_info->get_startup_wm_class()) == lower(app_id)))
+        {
+            return desktop_info->get_icon();
+        }
+    }
+
+    return {};
+}
 
 
 class WfToplevelIcon::impl
@@ -81,8 +123,14 @@ class WfToplevelIcon::impl
         }
 
         this->app_id = app_id;
-        IconProvider::image_set_icon(image,
-            app_id);
+        auto icon = desktop_icon_for_app_id(app_id);
+        if (icon)
+        {
+            image.set(icon);
+        } else
+        {
+            IconProvider::image_set_icon(image, app_id);
+        }
     }
 
     void send_rectangle_hint()
