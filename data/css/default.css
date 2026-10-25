@@ -193,6 +193,14 @@ text-shadow: 1px  1px 0 var(--bcol),
     padding-right: 0rem;
 }
 
+/* The places popover is a child of its dock button, so undo the dock icon styling */
+.wf-dock .places-popover image,
+.wf-dock .places-popover image:hover {
+    -gtk-icon-size: 16px;
+    -gtk-icon-transform: none;
+    transition: none;
+}
+
 .wf-dock button.activated {
     border-bottom: 3px solid white;
     margin-bottom: 5px;

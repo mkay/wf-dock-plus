@@ -7,6 +7,7 @@
 #include <gdkmm/display.h>
 #include <gtkmm/box.h>
 #include <gtkmm/eventcontrollerkey.h>
+#include <gtkmm/gestureclick.h>
 #include <gtkmm/label.h>
 #include <gtkmm/window.h>
 #include <gtk4-layer-shell.h>
@@ -78,6 +79,20 @@ WfDockPlaces::WfDockPlaces()
     });
     popover.signal_closed().connect([this] () { set_keyboard_grab(false); });
     button.set_popover(popover);
+
+    /* Middle click opens the first place without the popover. Ctrl+click can't
+     * work: the dock has no keyboard focus, so it never sees modifiers. */
+    auto middle = Gtk::GestureClick::create();
+    middle->set_button(GDK_BUTTON_MIDDLE);
+    middle->signal_released().connect([this] (int, double, double)
+    {
+        rebuild();
+        if (!places.empty())
+        {
+            open(0);
+        }
+    });
+    button.add_controller(middle);
     reload();
 }
 

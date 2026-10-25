@@ -100,7 +100,7 @@
 		</option>
 		<option name="places_button" type="bool">
 			<_short>Places button</_short>
-			<_long>Show a button left of the launchers which pops up a list of folders and opens the chosen one in the file manager.</_long>
+			<_long>Show a button left of the launchers which pops up a list of folders and opens the chosen one in the file manager. A middle click opens the first place directly.</_long>
 			<default>false</default>
 		</option>
 		<option name="places" type="string">
