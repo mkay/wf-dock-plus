@@ -4,6 +4,7 @@ executable(
     'dock.cpp',
     'dock-app.cpp',
     'launchers.cpp',
+    'places.cpp',
     'toplevel.cpp',
     'toplevel-icon.cpp'
   ],

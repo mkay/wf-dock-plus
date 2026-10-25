@@ -10,6 +10,7 @@
 
 #include "dock.hpp"
 #include "launchers.hpp"
+#include "places.hpp"
 #include "../util/gtk-utils.hpp"
 #include "gtkmm/flowbox.h"
 #include "gtkmm/separator.h"
@@ -26,6 +27,7 @@ class WfDock::impl
     std::unique_ptr<WayfireAutohidingWindow> window;
     wl_surface *_wl_surface;
     Gtk::Box layout;
+    WfDockPlaces places;
     WfDockLaunchers launchers;
     Gtk::Separator separator;
     Gtk::FlowBox box;
@@ -55,6 +57,7 @@ class WfDock::impl
         box.add_css_class("toplevels");
         box.set_selection_mode(Gtk::SelectionMode::NONE);
         separator.add_css_class("dock-separator");
+        layout.append(places.get_widget());
         layout.append(launchers.get_widget());
         layout.append(separator);
         layout.append(box);
@@ -105,6 +108,7 @@ class WfDock::impl
             auto cross_axis = vertical ? Gtk::Orientation::HORIZONTAL : Gtk::Orientation::VERTICAL;
             layout.set_orientation(main_axis);
             launchers.set_orientation(main_axis);
+            places.set_dock_position(position);
             separator.set_orientation(cross_axis);
 
             if (position.value() == "bottom")
@@ -146,14 +150,16 @@ class WfDock::impl
 
     void handle_config_reload()
     {
+        places.reload();
         launchers.reload();
         update_separator();
     }
 
-    /* Only separate launchers from running apps when both are present */
+    /* Only separate launchers and places from running apps when both are present */
     void update_separator()
     {
-        separator.set_visible(!launchers.empty() && box.get_first_child());
+        bool pinned = places.visible() || !launchers.empty();
+        separator.set_visible(pinned && box.get_first_child());
     }
 
     wl_surface *get_wl_surface()

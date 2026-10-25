@@ -98,6 +98,32 @@
 			<_long>Space-separated list of applications pinned to the left of the running apps, in order. Each entry is a desktop file id (with or without .desktop), an absolute path to a .desktop file, or a name defined with launcher_cmd_&lt;name&gt;.</_long>
 			<default></default>
 		</option>
+		<option name="places_button" type="bool">
+			<_short>Places button</_short>
+			<_long>Show a button left of the launchers which pops up a list of folders and opens the chosen one in the file manager.</_long>
+			<default>false</default>
+		</option>
+		<option name="places" type="string">
+			<_short>Places</_short>
+			<_long>Space-separated list of folders for the places button, in order: ~, ~/path, /path, URIs (file:// for paths with spaces), or "bookmarks" for the GTK bookmarks shown in the Nautilus sidebar. Empty means "~ bookmarks".</_long>
+			<default></default>
+		</option>
+		<option name="places_file_manager" type="string">
+			<_short>Places file manager</_short>
+			<_long>Command to open a folder with; the folder URI is appended unless the command contains %u or %f. Empty uses the default handler for folders.</_long>
+			<default></default>
+			<hint>file</hint>
+		</option>
+		<option name="places_icon" type="string">
+			<_short>Places icon</_short>
+			<_long>Icon name or path for the places button.</_long>
+			<default>folder</default>
+		</option>
+		<option name="places_label" type="string">
+			<_short>Places label</_short>
+			<_long>Tooltip of the places button.</_long>
+			<default>Places</default>
+		</option>
 		<option name="custom_launchers" type="dynamic-list" type-hint="dict">
 			<_short>Custom launchers</_short>
 			<_long>Commands for launchers which have no desktop file. Reference them by name in the launchers option.</_long>
