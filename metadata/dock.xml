@@ -119,6 +119,13 @@
 			<_long>Icon name or path for the places button.</_long>
 			<default>folder</default>
 		</option>
+		<option name="places_icon_size" type="int">
+			<_short>Places icon size</_short>
+			<_long>Size of the folder icons in the places popover, in pixels.</_long>
+			<default>24</default>
+			<min>8</min>
+			<max>128</max>
+		</option>
 		<option name="places_label" type="string">
 			<_short>Places label</_short>
 			<_long>Tooltip of the places button.</_long>

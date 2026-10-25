@@ -25,6 +25,17 @@ static std::string get_dock_option(const std::string& name)
     return option ? option->get_value_str() : "";
 }
 
+/* image_set_icon() takes "~/..." as a file path but doesn't expand it */
+static std::string expand_home(const std::string& path)
+{
+    if (path.rfind("~/", 0) == 0)
+    {
+        return Glib::get_home_dir() + path.substr(1);
+    }
+
+    return path;
+}
+
 WfDockPlaces::WfDockPlaces()
 {
     button.set_child(image);
@@ -129,7 +140,7 @@ void WfDockPlaces::reload()
     button.set_visible(enabled.value_or(false));
 
     auto icon = get_dock_option("places_icon");
-    IconProvider::image_set_icon(image, icon.empty() ? "folder" : icon);
+    IconProvider::image_set_icon(image, icon.empty() ? "folder" : expand_home(icon));
     auto label = get_dock_option("places_label");
     button.set_tooltip_text(label.empty() ? "Places" : label);
 }
@@ -238,11 +249,13 @@ void WfDockPlaces::rebuild()
         list.remove(*row);
     }
 
+    auto icon_size = wf::option_type::from_string<int>(get_dock_option("places_icon_size"));
     for (size_t i = 0; i < places.size(); i++)
     {
         auto box  = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 8);
         auto icon = Gtk::make_managed<Gtk::Image>();
         icon->set_from_icon_name("folder");
+        icon->set_pixel_size(icon_size.value_or(24));
         try {
             auto info = Gio::File::create_for_uri(places[i].uri)->query_info("standard::icon");
             if (info->get_icon())

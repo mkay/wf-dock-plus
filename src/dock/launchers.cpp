@@ -1,4 +1,5 @@
 #include <giomm/desktopappinfo.h>
+#include <glibmm/miscutils.h>
 #include <glibmm/regex.h>
 #include <gdkmm/display.h>
 #include <iostream>
@@ -14,6 +15,17 @@ static std::string get_dock_option(const std::string& name)
     return option ? option->get_value_str() : "";
 }
 
+/* image_set_icon() takes "~/..." as a file path but doesn't expand it */
+static std::string expand_home(const std::string& path)
+{
+    if (path.rfind("~/", 0) == 0)
+    {
+        return Glib::get_home_dir() + path.substr(1);
+    }
+
+    return path;
+}
+
 bool WfDockLauncher::initialize(const std::string& name)
 {
     std::string icon;
@@ -23,7 +35,7 @@ bool WfDockLauncher::initialize(const std::string& name)
         auto label = get_dock_option("launcher_label_" + name);
         app_info = Gio::AppInfo::create_from_commandline(cmd,
             label.empty() ? name : label, Gio::AppInfo::CreateFlags::NONE);
-        icon = get_dock_option("launcher_icon_" + name);
+        icon = expand_home(get_dock_option("launcher_icon_" + name));
         if (icon.empty())
         {
             icon = name;
