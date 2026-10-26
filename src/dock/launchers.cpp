@@ -1,5 +1,6 @@
 #include <giomm/desktopappinfo.h>
 #include <glibmm/miscutils.h>
+#include <glibmm/main.h>
 #include <glibmm/regex.h>
 #include <gdkmm/display.h>
 #include <iostream>
@@ -81,6 +82,14 @@ bool WfDockLauncher::initialize(const std::string& name)
     return true;
 }
 
+/* Keep in sync with the launch-bounce animation in default.css (2 x 550ms) */
+static constexpr int LAUNCH_BOUNCE_MS = 1100;
+
+WfDockLauncher::~WfDockLauncher()
+{
+    launching_timeout.disconnect();
+}
+
 void WfDockLauncher::launch()
 {
     auto ctx = Gdk::Display::get_default()->get_app_launch_context();
@@ -90,7 +99,16 @@ void WfDockLauncher::launch()
     {
         std::cerr << "wf-dock: failed to launch " << app_info->get_display_name() <<
             ": " << e.what() << std::endl;
+        return;
     }
+
+    button.add_css_class("launching");
+    launching_timeout.disconnect();
+    launching_timeout = Glib::signal_timeout().connect([this] ()
+    {
+        button.remove_css_class("launching");
+        return false;
+    }, LAUNCH_BOUNCE_MS);
 }
 
 WfDockLaunchers::WfDockLaunchers()

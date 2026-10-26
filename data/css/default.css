@@ -229,6 +229,13 @@ text-shadow: 1px  1px 0 var(--bcol),
     animation-iteration-count: 1;
 }
 
+.wf-dock button.launching image {
+    animation-name: launch-bounce;
+    animation-duration: 550ms;
+    animation-timing-function: ease-out;
+    animation-iteration-count: 2;
+}
+
 .wf-dock .closing image {
     animation-name: kromulent;
     animation-duration: 1000ms;
@@ -327,6 +334,18 @@ text-shadow: 1px  1px 0 var(--bcol),
 
 .wf-locker.sized-2160 {
     font-size:18px;
+}
+
+/* The scale is repeated because the animation overrides the hover scale of
+ * .wf-dock image; launchers are clicked while hovered, so use the hover size. */
+@keyframes launch-bounce {
+    0%, 100% {
+        -gtk-icon-transform: translateY(0px) scale(1.0);
+    }
+
+    50% {
+        -gtk-icon-transform: translateY(-12px) scale(1.0);
+    }
 }
 
 @keyframes embiggen {
