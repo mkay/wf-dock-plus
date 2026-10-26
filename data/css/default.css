@@ -233,7 +233,7 @@ text-shadow: 1px  1px 0 var(--bcol),
     animation-name: launch-bounce;
     animation-duration: 550ms;
     animation-timing-function: ease-out;
-    animation-iteration-count: 2;
+    animation-iteration-count: 1;
 }
 
 .wf-dock .closing image {

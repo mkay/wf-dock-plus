@@ -82,8 +82,8 @@ bool WfDockLauncher::initialize(const std::string& name)
     return true;
 }
 
-/* Keep in sync with the launch-bounce animation in default.css (2 x 550ms) */
-static constexpr int LAUNCH_BOUNCE_MS = 1100;
+/* Keep in sync with the launch-bounce animation in default.css (1 x 550ms) */
+static constexpr int LAUNCH_BOUNCE_MS = 550;
 
 WfDockLauncher::~WfDockLauncher()
 {
