@@ -201,6 +201,12 @@ text-shadow: 1px  1px 0 var(--bcol),
     transition: none;
 }
 
+/* The window list has no icons; pad its rows to the height of the places rows */
+.wf-dock .app-windows-list row {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
 .wf-dock button.activated {
     border-bottom: 3px solid white;
     margin-bottom: 5px;
@@ -227,6 +233,23 @@ text-shadow: 1px  1px 0 var(--bcol),
     animation-duration: 1000ms;
     animation-timing-function: linear;
     animation-iteration-count: 1;
+}
+
+/* Themes may animate background-size and background-image on buttons, e.g. a
+ * click ripple that grows the background to 1000%; markers drawn as background
+ * images would then fill the whole button when clicked or when an app loses focus */
+.wf-dock button,
+.wf-dock button:active {
+    transition: none;
+    animation: none;
+}
+
+/* A dot under apps with open windows; the activated border marks the focused one */
+.wf-dock button.running {
+    background-image: radial-gradient(circle closest-side, alpha(white, 0.8) 60%, transparent 100%);
+    background-size: 5px 5px;
+    background-position: center bottom;
+    background-repeat: no-repeat;
 }
 
 .wf-dock button.launching image {

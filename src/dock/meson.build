@@ -1,6 +1,7 @@
 executable(
   'wf-dock',
   [
+    'app-group.cpp',
     'dock.cpp',
     'dock-app.cpp',
     'launchers.cpp',

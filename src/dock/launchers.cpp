@@ -1,8 +1,7 @@
 #include <giomm/desktopappinfo.h>
 #include <glibmm/miscutils.h>
-#include <glibmm/main.h>
 #include <glibmm/regex.h>
-#include <gdkmm/display.h>
+#include <algorithm>
 #include <iostream>
 
 #include "launchers.hpp"
@@ -30,6 +29,7 @@ static std::string expand_home(const std::string& path)
 bool WfDockLauncher::initialize(const std::string& name)
 {
     std::string icon;
+    Glib::RefPtr<Gio::AppInfo> app_info;
     auto cmd = get_dock_option("launcher_cmd_" + name);
     if (!cmd.empty())
     {
@@ -41,6 +41,8 @@ bool WfDockLauncher::initialize(const std::string& name)
         {
             icon = name;
         }
+
+        add_app_id(name);
     } else
     {
         /* Accept "firefox", "firefox.desktop" and absolute paths to .desktop files */
@@ -48,6 +50,7 @@ bool WfDockLauncher::initialize(const std::string& name)
         if (!name.empty() && (name[0] == '/'))
         {
             desktop_info = Gio::DesktopAppInfo::create_from_filename(name);
+            add_app_id(Glib::path_get_basename(name));
         } else
         {
             desktop_info = Gio::DesktopAppInfo::create(name);
@@ -55,6 +58,14 @@ bool WfDockLauncher::initialize(const std::string& name)
             {
                 desktop_info = Gio::DesktopAppInfo::create(name + ".desktop");
             }
+
+            add_app_id(name);
+        }
+
+        if (desktop_info)
+        {
+            add_app_id(desktop_info->get_id());
+            add_app_id(desktop_info->get_startup_wm_class());
         }
 
         app_info = desktop_info;
@@ -71,44 +82,43 @@ bool WfDockLauncher::initialize(const std::string& name)
         return false;
     }
 
-    IconProvider::image_set_icon(image, icon);
-    button.set_child(image);
-    button.set_tooltip_text(app_info->get_display_name());
-    button.add_css_class("flat");
-    button.add_css_class("toplevel-icon");
-    button.add_css_class("launcher");
-    button.set_focusable(false);
-    button.signal_clicked().connect(sigc::mem_fun(*this, &WfDockLauncher::launch));
+    /* For apps whose windows match neither the desktop id nor StartupWMClass */
+    auto extra_ids = get_dock_option("launcher_app_id_" + name);
+    for (auto& app_id : Glib::Regex::split_simple("\\s+", extra_ids.c_str()))
+    {
+        add_app_id(app_id);
+    }
+
+    IconProvider::image_set_icon(group.get_image(), icon);
+    group.get_widget().add_css_class("launcher");
+    group.set_app_info(app_info);
     return true;
 }
 
-/* Keep in sync with the launch-bounce animation in default.css (1 x 550ms) */
-static constexpr int LAUNCH_BOUNCE_MS = 550;
-
-WfDockLauncher::~WfDockLauncher()
+/* Window app_ids are compared without case and without a .desktop suffix */
+void WfDockLauncher::add_app_id(const std::string& app_id)
 {
-    launching_timeout.disconnect();
-}
-
-void WfDockLauncher::launch()
-{
-    auto ctx = Gdk::Display::get_default()->get_app_launch_context();
-    try {
-        app_info->launch(std::vector<Glib::RefPtr<Gio::File>>(), ctx);
-    } catch (const Glib::Error& e)
+    std::string id = app_id;
+    const std::string suffix = ".desktop";
+    if ((id.size() > suffix.size()) &&
+        (id.compare(id.size() - suffix.size(), suffix.size(), suffix) == 0))
     {
-        std::cerr << "wf-dock: failed to launch " << app_info->get_display_name() <<
-            ": " << e.what() << std::endl;
-        return;
+        id.resize(id.size() - suffix.size());
     }
 
-    button.add_css_class("launching");
-    launching_timeout.disconnect();
-    launching_timeout = Glib::signal_timeout().connect([this] ()
+    if (!id.empty())
     {
-        button.remove_css_class("launching");
-        return false;
-    }, LAUNCH_BOUNCE_MS);
+        app_ids.push_back(id);
+    }
+}
+
+bool WfDockLauncher::matches(const std::string& app_id) const
+{
+    return !app_id.empty() && std::any_of(app_ids.begin(), app_ids.end(),
+        [&] (const std::string& id)
+    {
+        return g_ascii_strcasecmp(id.c_str(), app_id.c_str()) == 0;
+    });
 }
 
 WfDockLaunchers::WfDockLaunchers()
@@ -136,7 +146,7 @@ void WfDockLaunchers::reload()
 {
     for (auto& launcher : launchers)
     {
-        box.remove(launcher->button);
+        box.remove(launcher->group.get_widget());
     }
 
     launchers.clear();
@@ -151,8 +161,21 @@ void WfDockLaunchers::reload()
         auto launcher = std::make_unique<WfDockLauncher>();
         if (launcher->initialize(name))
         {
-            box.append(launcher->button);
+            box.append(launcher->group.get_widget());
             launchers.push_back(std::move(launcher));
         }
     }
+}
+
+WfDockAppGroup*WfDockLaunchers::find(const std::string& app_id)
+{
+    for (auto& launcher : launchers)
+    {
+        if (launcher->matches(app_id))
+        {
+            return &launcher->group;
+        }
+    }
+
+    return nullptr;
 }

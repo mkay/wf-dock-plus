@@ -9,6 +9,7 @@
 #include <wf-autohide-window.hpp>
 
 #include "dock.hpp"
+#include "app-group.hpp"
 #include "launchers.hpp"
 #include "places.hpp"
 #include "../util/gtk-utils.hpp"
@@ -31,6 +32,10 @@ class WfDock::impl
     WfDockLaunchers launchers;
     Gtk::Separator separator;
     Gtk::FlowBox box;
+    /* Running apps go into their launcher, or into box if they have none */
+    WfDockApps apps{launchers,
+        [this] (Gtk::Widget& widget) { add_child(widget); },
+        [this] (Gtk::Widget& widget) { rem_child(widget); }};
     std::unique_ptr<WayfireMenuWidget> network_image;
     std::unique_ptr<NetworkControlWidget> network_control;
     std::shared_ptr<NetworkManager> network_manager;
@@ -151,8 +156,13 @@ class WfDock::impl
     void handle_config_reload()
     {
         places.reload();
-        launchers.reload();
+        apps.reload_launchers();
         update_separator();
+    }
+
+    WfDockApps& get_apps()
+    {
+        return apps;
     }
 
     /* Only separate launchers and places from running apps when both are present */
@@ -205,6 +215,11 @@ void WfDock::rem_child(Gtk::Widget& w)
 void WfDock::handle_config_reload()
 {
     return pimpl->handle_config_reload();
+}
+
+WfDockApps& WfDock::get_apps()
+{
+    return pimpl->get_apps();
 }
 
 wl_surface*WfDock::get_wl_surface()

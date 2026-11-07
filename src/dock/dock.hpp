@@ -8,6 +8,8 @@
 #include "giomm/application.h"
 #include "wf-shell-app.hpp"
 
+class WfDockApps;
+
 class WfDock
 {
   public:
@@ -17,6 +19,7 @@ class WfDock
     void add_child(Gtk::Widget& widget);
     void rem_child(Gtk::Widget& widget);
     void handle_config_reload();
+    WfDockApps& get_apps();
 
     wl_surface *get_wl_surface();
     class impl;

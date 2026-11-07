@@ -1,226 +1,76 @@
-#include <gtkmm/button.h>
-#include <gtkmm/box.h>
-#include <gtkmm/icontheme.h>
-#include <gtkmm/image.h>
-
-#include <gdkmm/display.h>
-#include <gdkmm/seat.h>
-#include <giomm/desktopappinfo.h>
-#include <gdk/wayland/gdkwayland.h>
-
 #include "dock.hpp"
-#include "toplevel.hpp"
+#include "app-group.hpp"
 #include "toplevel-icon.hpp"
-#include "gtk-utils.hpp"
-#include <cassert>
-#include <cctype>
-#include "wf-option-wrap.hpp"
 
-/* Icon declared by the app's .desktop file, matched by desktop id or StartupWMClass.
- * IconProvider::image_set_icon() prefers a theme icon named like the app_id, which
- * overrides the .desktop Icon= and makes running apps differ from their launchers. */
-static Glib::RefPtr<Gio::Icon> desktop_icon_for_app_id(const std::string & app_id)
-{
-    auto lower = [] (std::string str)
-    {
-        for (auto & c : str)
-        {
-            c = std::tolower((unsigned char)c);
-        }
-
-        return str;
-    };
-
-    for (auto & id : {app_id, lower(app_id)})
-    {
-        for (auto & suffix : {"", ".desktop"})
-        {
-            auto info = Gio::DesktopAppInfo::create(id + suffix);
-            if (info && info->get_icon())
-            {
-                return info->get_icon();
-            }
-        }
-    }
-
-    for (auto & info : Gio::AppInfo::get_all())
-    {
-        auto desktop_info = std::dynamic_pointer_cast<Gio::DesktopAppInfo>(info);
-        if (desktop_info && desktop_info->get_icon() &&
-            (lower(desktop_info->get_startup_wm_class()) == lower(app_id)))
-        {
-            return desktop_info->get_icon();
-        }
-    }
-
-    return {};
-}
-
-
+/* A window on one output. Instead of a button of its own, it reports to the
+ * dock of that output, which groups the windows by app (see app-group.cpp). */
 class WfToplevelIcon::impl
 {
     zwlr_foreign_toplevel_handle_v1 *handle;
     wl_output *output;
 
-    uint32_t state;
-    bool closing = false;
+    std::string app_id, title;
+    uint32_t state = 0;
+    /* WfToplevel sets the title, app_id and state right after creation; wait for
+     * the app_id so the window doesn't briefly get an icon of its own */
+    bool has_app_id = false;
+    bool closing    = false;
 
-    Gtk::Button button;
-    Gtk::Image image;
-    std::string app_id;
-    WfOption<int> icon_height{"dock/icon_height"};
+    WfDockApps *get_apps()
+    {
+        auto dock = WfDockApp::get().dock_for_wl_output(output);
+        return dock ? &dock->get_apps() : nullptr;
+    }
+
+    void sync()
+    {
+        auto apps = get_apps();
+        if (apps && has_app_id && !closing)
+        {
+            apps->set_window(handle, app_id, title, state);
+        }
+    }
 
   public:
     impl(zwlr_foreign_toplevel_handle_v1 *handle, wl_output *output)
     {
         this->handle = handle;
         this->output = output;
-
-        button.set_child(image);
-        button.set_tooltip_text("none");
-        button.add_css_class("flat");
-        button.add_css_class("toplevel-icon");
-        button.set_focusable(false);
-
-        button.signal_clicked().connect(
-            sigc::mem_fun(*this, &WfToplevelIcon::impl::on_clicked));
-
-        auto dock = WfDockApp::get().dock_for_wl_output(output);
-        assert(dock); // ToplevelIcon is created only for existing outputs
-        dock->add_child(button);
-    }
-
-    void on_clicked()
-    {
-        if (closing)
-        {
-            return;
-        }
-
-        if (!(state & WF_TOPLEVEL_STATE_ACTIVATED))
-        {
-            auto gseat = Gdk::Display::get_default()->get_default_seat();
-            auto seat  = gdk_wayland_seat_get_wl_seat(gseat->gobj());
-            zwlr_foreign_toplevel_handle_v1_activate(handle, seat);
-        } else
-        {
-            send_rectangle_hint();
-            if (state & WF_TOPLEVEL_STATE_MINIMIZED)
-            {
-                zwlr_foreign_toplevel_handle_v1_unset_minimized(handle);
-            } else
-            {
-                zwlr_foreign_toplevel_handle_v1_set_minimized(handle);
-            }
-        }
     }
 
     void set_app_id(std::string app_id)
     {
-        if (closing)
-        {
-            return;
-        }
-
         this->app_id = app_id;
-        auto icon = desktop_icon_for_app_id(app_id);
-        if (icon)
-        {
-            image.set(icon);
-        } else
-        {
-            IconProvider::image_set_icon(image, app_id);
-        }
-    }
-
-    void send_rectangle_hint()
-    {
-        if (closing)
-        {
-            return;
-        }
-
-        Gtk::Widget *widget = &this->button;
-
-        int x = 0, y = 0;
-        int width = image.get_allocated_width();
-        int height = image.get_allocated_height();
-
-        while (widget)
-        {
-            x += widget->get_allocation().get_x();
-            y += widget->get_allocation().get_y();
-            widget = widget->get_parent();
-        }
-
-        auto dock = WfDockApp::get().dock_for_wl_output(output);
-        if (!dock)
-        {
-            return;
-        }
-
-        zwlr_foreign_toplevel_handle_v1_set_rectangle(handle,
-            dock->get_wl_surface(), x, y, width, height);
+        has_app_id   = true;
+        sync();
     }
 
     void set_title(std::string title)
     {
-        if (closing)
-        {
-            return;
-        }
-
-        button.set_tooltip_text(title);
-    }
-
-    void close()
-    {
-        button.add_css_class("closing");
-        closing = true;
+        this->title = title;
+        sync();
     }
 
     void set_state(uint32_t state)
     {
-        if (closing)
-        {
-            return;
-        }
-
         this->state = state;
-        bool is_activated = this->state & WF_TOPLEVEL_STATE_ACTIVATED;
-        bool is_min = state & WF_TOPLEVEL_STATE_MINIMIZED;
-        bool is_max = state & WF_TOPLEVEL_STATE_MAXIMIZED;
-        if (is_activated)
-        {
-            button.add_css_class("activated");
-        } else
-        {
-            button.remove_css_class("activated");
-        }
+        sync();
+    }
 
-        if (is_min)
+    void close()
+    {
+        closing = true;
+        if (auto apps = get_apps())
         {
-            button.add_css_class("minimized");
-        } else
-        {
-            button.remove_css_class("minimized");
-        }
-
-        if (is_max)
-        {
-            button.add_css_class("maximized");
-        } else
-        {
-            button.remove_css_class("maximized");
+            apps->remove_window(handle, true);
         }
     }
 
     ~impl()
     {
-        auto dock = WfDockApp::get().dock_for_wl_output(output);
-        if (dock)
+        if (auto apps = get_apps())
         {
-            dock->rem_child(button);
+            apps->remove_window(handle, false);
         }
     }
 };

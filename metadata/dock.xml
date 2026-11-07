@@ -95,7 +95,7 @@
 		</option>
 		<option name="launchers" type="string">
 			<_short>Launchers</_short>
-			<_long>Space-separated list of applications pinned to the left of the running apps, in order. Each entry is a desktop file id (with or without .desktop), an absolute path to a .desktop file, or a name defined with launcher_cmd_&lt;name&gt;.</_long>
+			<_long>Space-separated list of applications pinned to the left of the running apps, in order. Windows of a pinned app are grouped into its launcher instead of getting an icon of their own. Each entry is a desktop file id (with or without .desktop), an absolute path to a .desktop file, or a name defined with launcher_cmd_&lt;name&gt;.</_long>
 			<default></default>
 		</option>
 		<option name="places_button" type="bool">
@@ -144,6 +144,11 @@
 			</entry>
 			<entry prefix="launcher_label_" type="string" name="label">
 				<_short>Label</_short>
+				<default></default>
+			</entry>
+			<entry prefix="launcher_app_id_" type="string" name="app_id">
+				<_short>App ID</_short>
+				<_long>Space-separated window app_ids that belong to this launcher, for apps whose windows match neither the launcher name, the desktop file id nor its StartupWMClass.</_long>
 				<default></default>
 			</entry>
 		</option>

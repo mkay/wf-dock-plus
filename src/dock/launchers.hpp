@@ -3,30 +3,27 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <giomm/appinfo.h>
 #include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/image.h>
-#include <sigc++/connection.h>
 
-/* A single pinned application in the dock. Clicking it starts a new instance. */
+#include "app-group.hpp"
+
+/* A single pinned application in the dock. Clicking it starts the app,
+ * or switches to its windows while it is running. */
 class WfDockLauncher
 {
   public:
-    Gtk::Button button;
-
-    ~WfDockLauncher();
+    WfDockAppGroup group;
 
     /* Resolves name to a desktop entry, or to the launcher_cmd_<name> entry
      * in the [dock] section. Returns false if nothing could be found. */
     bool initialize(const std::string& name);
+    /* Whether windows with this app_id belong to the launcher */
+    bool matches(const std::string& app_id) const;
 
   private:
-    Gtk::Image image;
-    Glib::RefPtr<Gio::AppInfo> app_info;
-    sigc::connection launching_timeout;
+    std::vector<std::string> app_ids;
 
-    void launch();
+    void add_app_id(const std::string& app_id);
 };
 
 /* The row of pinned applications, in the order given by dock/launchers */
@@ -39,6 +36,8 @@ class WfDockLaunchers
     bool empty() const;
     void set_orientation(Gtk::Orientation orientation);
     void reload();
+    /* The launcher for windows with this app_id, or nullptr */
+    WfDockAppGroup *find(const std::string& app_id);
 
   private:
     Gtk::Box box;
