@@ -77,10 +77,13 @@ WfDockPlaces::WfDockPlaces()
     }, false);
     popover.add_controller(keys);
 
-    /* Rebuilt on every popup so bookmark edits show up without a reload */
+    /* Rebuilt on every popup so bookmark edits show up without a reload. This runs
+     * before the popup: GtkPopover moves the focus into its content on show, before
+     * any show handler of ours, and passes NULL to gtk_widget_is_ancestor() when an
+     * empty list leaves nothing to focus. */
+    button.set_create_popup_func([this] () { rebuild(); });
     popover.signal_show().connect([this] ()
     {
-        rebuild();
         set_keyboard_grab(true);
         if (auto row = list.get_row_at_index(0))
         {

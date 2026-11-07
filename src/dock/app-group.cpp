@@ -161,7 +161,6 @@ WfDockAppGroup::WfDockAppGroup()
     popover.set_has_arrow(true);
     popover.signal_show().connect([this] ()
     {
-        rebuild_list();
         set_keyboard_grab(true);
         if (auto row = list.get_row_at_index(0))
         {
@@ -389,6 +388,10 @@ void WfDockAppGroup::show_windows()
         popover.set_position(Gtk::PositionType::TOP);
     }
 
+    /* Fill the list before showing: GtkPopover moves the focus into its content
+     * on show, before any show handler of ours runs, and passes NULL to
+     * gtk_widget_is_ancestor() when an empty list leaves nothing to focus */
+    rebuild_list();
     popover.popup();
 }
 
