@@ -66,7 +66,13 @@ class WfDockAppGroup
     Glib::RefPtr<Gio::AppInfo> app_info;
     /* In the order they were opened, which is the order clicks cycle through */
     std::vector<WfDockWindow*> windows;
-    std::vector<zwlr_foreign_toplevel_handle_v1*> list_handles;
+    /* What each row of the window list does, in row order */
+    struct ListRow
+    {
+        enum class Kind { WINDOW, NEW_WINDOW, CLOSE_ALL } kind;
+        zwlr_foreign_toplevel_handle_v1 *handle = nullptr;
+    };
+    std::vector<ListRow> list_rows;
     sigc::connection launching_timeout;
     bool long_pressed = false;
     /* Lets asynchronous D-Bus replies check that the group still exists */
@@ -80,6 +86,7 @@ class WfDockAppGroup
     void show_windows();
     void rebuild_list();
     void activate_row(int index);
+    void close_all_windows();
     void set_keyboard_grab(bool grab);
     void bounce();
     bool activate_app_new_window();

@@ -130,7 +130,7 @@ WfDockAppGroup::WfDockAppGroup()
     /* Without a header function, the list drops headers set on its rows */
     list.set_header_func([] (Gtk::ListBoxRow *row, Gtk::ListBoxRow *before)
     {
-        if (before && row->has_css_class("new-window"))
+        if (before && (row->has_css_class("new-window") || row->has_css_class("close-all")))
         {
             if (!row->get_header())
             {
@@ -142,13 +142,20 @@ WfDockAppGroup::WfDockAppGroup()
         }
     });
 
-    /* 1-9 pick a row directly, like in the places popover */
+    /* 1-9 pick a row directly, like in the places popover; closing all windows
+     * has no number, so a stray key press can't do it */
     auto keys = Gtk::EventControllerKey::create();
     keys->signal_key_pressed().connect([this] (guint keyval, guint, Gdk::ModifierType)
     {
         if ((keyval >= GDK_KEY_1) && (keyval <= GDK_KEY_9))
         {
-            activate_row(keyval - GDK_KEY_1);
+            size_t index = keyval - GDK_KEY_1;
+            if ((index < list_rows.size()) &&
+                (list_rows[index].kind != ListRow::Kind::CLOSE_ALL))
+            {
+                activate_row(index);
+            }
+
             return true;
         }
 
@@ -396,7 +403,7 @@ void WfDockAppGroup::show_windows()
 }
 
 /* Rows look like the places popover: label and the 1-9 shortcut */
-static Gtk::Box *make_row(Gtk::Label& label, int index)
+static Gtk::Box *make_row(Gtk::Label& label, int index = 9)
 {
     label.set_xalign(0);
     label.set_hexpand(true);
@@ -422,7 +429,7 @@ void WfDockAppGroup::rebuild_list()
         list.remove(*row);
     }
 
-    list_handles.clear();
+    list_rows.clear();
     for (auto window : windows)
     {
         auto title = window->title.empty() ? window->app_id : window->title;
@@ -440,43 +447,70 @@ void WfDockAppGroup::rebuild_list()
             label->add_css_class("dim-label");
         }
 
-        list.append(*make_row(*label, list_handles.size()));
-        list_handles.push_back(window->handle);
+        list.append(*make_row(*label, list_rows.size()));
+        list_rows.push_back({ListRow::Kind::WINDOW, window->handle});
     }
 
     if (app_info)
     {
         auto label = Gtk::make_managed<Gtk::Label>("New Window");
-        list.append(*make_row(*label, list_handles.size()));
-        auto row = list.get_row_at_index(list_handles.size());
-        row->add_css_class("new-window");
-        list_handles.push_back(nullptr);
-        list.invalidate_headers();
+        list.append(*make_row(*label, list_rows.size()));
+        list.get_row_at_index(list_rows.size())->add_css_class("new-window");
+        list_rows.push_back({ListRow::Kind::NEW_WINDOW});
     }
+
+    /* Last and without a number, away from the entries clicked often */
+    if (!windows.empty())
+    {
+        auto label = Gtk::make_managed<Gtk::Label>(windows.size() == 1 ?
+            std::string("Close Window") : "Close " + std::to_string(windows.size()) + " Windows");
+        list.append(*make_row(*label));
+        list.get_row_at_index(list_rows.size())->add_css_class("close-all");
+        list_rows.push_back({ListRow::Kind::CLOSE_ALL});
+    }
+
+    list.invalidate_headers();
 }
 
 void WfDockAppGroup::activate_row(int index)
 {
-    if ((index < 0) || (index >= (int)list_handles.size()))
+    if ((index < 0) || (index >= (int)list_rows.size()))
     {
         return;
     }
 
-    auto handle = list_handles[index];
+    auto row = list_rows[index];
     popover.popdown();
-    if (!handle)
+    switch (row.kind)
     {
+      case ListRow::Kind::NEW_WINDOW:
         launch_new_window();
         return;
+
+      case ListRow::Kind::CLOSE_ALL:
+        close_all_windows();
+        return;
+
+      case ListRow::Kind::WINDOW:
+        break;
     }
 
     for (auto window : windows)
     {
-        if (window->handle == handle)
+        if (window->handle == row.handle)
         {
             activate(window);
             return;
         }
+    }
+}
+
+/* The same request as a window's close button, so apps can still ask to save */
+void WfDockAppGroup::close_all_windows()
+{
+    for (auto window : windows)
+    {
+        zwlr_foreign_toplevel_handle_v1_close(window->handle);
     }
 }
 
