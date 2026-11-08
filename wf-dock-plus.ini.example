@@ -1,0 +1,67 @@
+# Example [dock-plus] section for ~/.config/wf-shell.ini.
+# Commented options show their defaults.
+
+[dock-plus]
+# applications pinned left of the running apps, in this order.
+# desktop file ids (with or without .desktop), absolute .desktop paths,
+# or names of custom launchers defined with launcher_cmd_<name>
+launchers = firefox org.gnome.Nautilus foot notes
+launcher_cmd_notes = gnome-text-editor
+launcher_icon_notes = accessories-text-editor
+launcher_label_notes = Notes
+# windows of a pinned app are grouped into its launcher: click cycles through
+# them, middle click opens a new window, right click or a long press lists them.
+# windows match by desktop id, StartupWMClass or the launcher name; add other
+# window app_ids with launcher_app_id_<name>
+launcher_app_id_notes = org.gnome.TextEditor
+
+# a button left of the launchers which pops up a list of folders;
+# a middle click opens the first one directly.
+# places: ~, ~/path, /path, URIs (file:// for paths with spaces), or
+# "bookmarks" for the GTK bookmarks; empty means "~ bookmarks".
+# the file manager command gets the folder URI appended unless it contains
+# %u or %f; empty uses the default handler for folders
+places_button = true
+places = ~ ~/Downloads bookmarks
+places_file_manager = nautilus --new-window
+# places_icon = folder
+# places_icon_size = 24
+# places_label = Places
+
+# screen edge: top, bottom, left or right
+# position = bottom
+
+# size of the app icons, in pixels
+# icon_height = 72
+
+# hide the dock until the pointer reaches the screen edge (Wayfire only)
+# autohide = true
+# autohide_duration = 300
+# autohide_show_delay = 300
+# autohide_hide_delay = 500
+# edge_hotspot_size = 20
+# adjacent_edge_hotspot_size = 20
+
+# space in pixels between the dock and the screen edge; with mirror_margin,
+# also between the dock and maximized windows
+# edge_margin = 0
+# mirror_margin = true
+
+# stretch the dock along the whole screen edge
+# full_span = false
+
+# if greater than 0, start a new line after this many running apps
+# max_per_line = 0
+
+# minimal_height = 100
+# minimal_width = 100
+
+# keep icons of closed windows for 2 seconds, for CSS animations
+# show_close = true
+
+# an extra CSS file, on top of ~/.config/wf-dock-plus/css/*.css
+# css_path =
+
+# icons for apps that don't provide one. WCM doesn't know these options and
+# drops them when it saves wf-shell.ini
+# icon_mapping_jetbrains-idea-ce = /path/to/idea.png

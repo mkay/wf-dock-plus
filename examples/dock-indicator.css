@@ -1,0 +1,19 @@
+.wf-dock button {
+    padding-bottom: 8px;
+}
+
+/* A bar in the GTK theme's accent color under the focused app. Themes based on
+ * Adwaita define accent_bg_color; with one that doesn't, the bar is missing. */
+.wf-dock button.activated {
+    border-bottom: none;
+    margin-bottom: 0;
+    background-image: linear-gradient(@accent_bg_color, @accent_bg_color);
+    background-size: 32px 3px;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+}
+
+.wf-dock button.minimized image {
+    opacity: 0.75;
+    -gtk-icon-filter: grayscale(1);
+}
