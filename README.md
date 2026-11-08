@@ -4,6 +4,10 @@ A dock for [Wayfire](https://github.com/WayfireWM/wayfire), based on `wf-dock` f
 
 wf-dock-plus is an unofficial project. It is not affiliated with or endorsed by the Wayfire or wf-shell developers, so please don't report its bugs to them. It installs next to wf-shell and doesn't replace any of its programs.
 
+![The dock with its places menu open](gallery/dock-places.png)
+
+![The dock with the window list of Firefox open](gallery/dock-window-list.png)
+
 ## Features
 
 - **Pinned launchers** left of the running apps, separated by a thin line. Entries are desktop file ids, absolute paths to `.desktop` files, or custom launchers with their own command, icon and label.
