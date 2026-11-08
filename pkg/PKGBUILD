@@ -10,7 +10,7 @@ pkgdesc='Dock for Wayfire with launchers and a places menu, based on wf-dock'
 arch=(aarch64 x86_64)
 url='https://github.com/mkay/wf-dock-plus'
 license=(MIT)
-depends=(gcc-libs glib2 glibc glibmm-2.68 gtk4 gtk4-layer-shell gtkmm-4.0
+depends=(cairomm-1.16 gcc-libs glib2 glibc glibmm-2.68 gtk4 gtk4-layer-shell gtkmm-4.0
          libsigc++-3.0 wayland wf-config)
 makedepends=(git meson)
 
