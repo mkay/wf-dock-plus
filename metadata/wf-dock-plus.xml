@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <wf-shell>
-	<plugin name="dock">
-		<_short>Dock</_short>
+	<plugin name="dock-plus">
+		<_short>Dock Plus</_short>
 		<category>Shell</category>
 		<option name="css_path" type="string">
 			<_short>CSS Path</_short>

@@ -10,7 +10,7 @@
 
 static std::string get_dock_option(const std::string& name)
 {
-    auto section = WayfireShellApp::get().config.get_section("dock");
+    auto section = WayfireShellApp::get().config.get_section(DOCK_SECTION);
     auto option  = section ? section->get_option_or(name) : nullptr;
     return option ? option->get_value_str() : "";
 }

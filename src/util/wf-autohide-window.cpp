@@ -1,6 +1,5 @@
 #include "wf-autohide-window.hpp"
 #include "wayfire-shell-unstable-v2-client-protocol.h"
-#include "wf-popover.hpp"
 
 #include <gtk4-layer-shell.h>
 #include <wf-shell-app.hpp>
@@ -13,7 +12,6 @@
 
 WayfireAutohidingWindow::WayfireAutohidingWindow(WayfireOutput *output,
     const std::string& section) :
-    force_show_popup{"panel/force_show_popup"},
     position{section + "/position"},
     full_span{section + "/full_span"},
     minimal_width{section + "/minimal_width"},
@@ -76,6 +74,9 @@ WayfireAutohidingWindow::WayfireAutohidingWindow(WayfireOutput *output,
 
     this->autohide_opt.set_callback([=] { setup_autohide(); });
 
+    // Set css match
+    add_css_class(output->monitor->get_connector());
+
     if (!output->output)
     {
         std::cerr << "WARNING: Compositor does not support zwf_shell_manager_v2 " << \
@@ -84,28 +85,10 @@ WayfireAutohidingWindow::WayfireAutohidingWindow(WayfireOutput *output,
         return;
     }
 
-    auto display = Gdk::Display::get_default();
     signals.push_back(WayfireShellApp::get().signal_monitor_list_changed().connect([=] ()
     {
         this->reinit_ext_hotspots();
     }));
-
-
-
-    static const zwf_output_v2_listener listener = {
-        .enter_fullscreen = [] (void *data, zwf_output_v2*)
-        {},
-        .leave_fullscreen = [] (void *data, zwf_output_v2*)
-        {},
-        .toggle_menu = [] (void *data, zwf_output_v2*)
-        {
-            ((WayfireAutohidingWindow*)data)->output->toggle_menu_signal().emit();
-        },
-    };
-    zwf_output_v2_add_listener(output->output, &listener, this);
-
-    // Set css match
-    add_css_class(output->monitor->get_connector());
 }
 
 WayfireAutohidingWindow::~WayfireAutohidingWindow()
@@ -534,7 +517,7 @@ void WayfireAutohidingWindow::decrease_autohide()
 
 bool WayfireAutohidingWindow::should_autohide() const
 {
-    return autohide_counter && !this->active_button && !this->input_inside_panel;
+    return autohide_counter && !this->input_inside_panel;
 }
 
 bool WayfireAutohidingWindow::m_do_hide()
@@ -615,84 +598,6 @@ bool WayfireAutohidingWindow::update_margin()
     }
 
     return false;
-}
-
-bool WayfireAutohidingWindow::is_active_popover(WayfireMenuWidget& button)
-{
-    return this->active_button == &button;
-}
-
-bool WayfireAutohidingWindow::has_active_popover()
-{
-    return this->active_button != nullptr;
-}
-
-void WayfireAutohidingWindow::set_active_popover(WayfireMenuWidget& button)
-{
-    if (!is_active_popover(button))
-    {
-        this->active_button = &button;
-    }
-
-    /* Set this panel to forcibly show over fullscreen apps */
-    if (button.is_manual_popup() && force_show_popup.value())
-    {
-        gtk_layer_set_layer(gobj(), GTK_LAYER_SHELL_LAYER_OVERLAY);
-    }
-
-    const bool should_grab_focus = this->active_button->is_keyboard_interactive();
-    if (should_grab_focus)
-    {
-        gtk_layer_set_keyboard_mode(this->gobj(), GTK_LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE);
-    } else
-    {
-        gtk_layer_set_keyboard_mode(this->gobj(), GTK_LAYER_SHELL_KEYBOARD_MODE_NONE);
-    }
-
-    schedule_show(0);
-}
-
-void WayfireAutohidingWindow::unset_active_popover()
-{
-    if (this->active_button)
-    {
-        this->active_button = nullptr;
-        this->popover_hide.disconnect();
-    }
-
-    gtk_layer_set_keyboard_mode(this->gobj(), GTK_LAYER_SHELL_KEYBOARD_MODE_NONE);
-
-    if (should_autohide())
-    {
-        schedule_hide(autohide_hide_delay);
-    }
-
-    WfOption<std::string> panel_layer{"panel/layer"};
-
-    if ((std::string)panel_layer == "overlay")
-    {
-        gtk_layer_set_layer(gobj(), GTK_LAYER_SHELL_LAYER_OVERLAY);
-    }
-
-    if ((std::string)panel_layer == "top")
-    {
-        gtk_layer_set_layer(gobj(), GTK_LAYER_SHELL_LAYER_TOP);
-    }
-
-    if ((std::string)panel_layer == "bottom")
-    {
-        gtk_layer_set_layer(gobj(), GTK_LAYER_SHELL_LAYER_BOTTOM);
-    }
-
-    if ((std::string)panel_layer == "background")
-    {
-        gtk_layer_set_layer(gobj(), GTK_LAYER_SHELL_LAYER_BACKGROUND);
-    }
-}
-
-WayfireMenuWidget*WayfireAutohidingWindow::get_active_popover()
-{
-    return this->active_button;
 }
 
 void WayfireAutohidingWindow::setup_autohide()

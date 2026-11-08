@@ -20,8 +20,6 @@ struct WayfireOutput
     GMonitor monitor = nullptr;
     wl_output *wo;
     zwf_output_v2 *output;
-    sigc::signal<void()> toggle_menu_signal();
-    sigc::signal<void()> m_toggle_menu_signal;
 
     WayfireOutput(const GMonitor& monitor, zwf_shell_manager_v2 *zwf_manager);
     ~WayfireOutput();
@@ -43,9 +41,6 @@ class WayfireShellApp
     bool sanity_check_outputs();
 
   protected:
-    /** This should be initialized by the subclass in each program which uses
-     * wf-shell-app */
-    bool alternative_monitors = false; /* Used to skip monitor management in lockscreen */
     static std::unique_ptr<WayfireShellApp> instance;
     std::optional<std::string> cmdline_config;
     std::optional<std::string> cmdline_css;
@@ -94,8 +89,6 @@ class WayfireShellApp
     virtual Gio::Application::Flags get_extra_application_flags();
     virtual std::string get_application_name() = 0;
     std::vector<std::unique_ptr<WayfireOutput>> *get_wayfire_outputs();
-    wl_output *live_preview_output;
-    std::string live_preview_output_name;
     sigc::signal<void()> signal_monitor_list_changed()
     {
         return monitor_list_changed;

@@ -15,10 +15,6 @@
 #include "../util/gtk-utils.hpp"
 #include "gtkmm/flowbox.h"
 #include "gtkmm/separator.h"
-#include "network/manager.hpp"
-#include "network/network-widget.hpp"
-#include "network/network.hpp"
-#include "wf-popover.hpp"
 #include <css-config.hpp>
 
 
@@ -36,24 +32,20 @@ class WfDock::impl
     WfDockApps apps{launchers,
         [this] (Gtk::Widget& widget) { add_child(widget); },
         [this] (Gtk::Widget& widget) { rem_child(widget); }};
-    std::unique_ptr<WayfireMenuWidget> network_image;
-    std::unique_ptr<NetworkControlWidget> network_control;
-    std::shared_ptr<NetworkManager> network_manager;
 
-    WfOption<std::string> css_path{"dock/css_path"};
-    WfOption<int> entries_per_line{"dock/max_per_line"};
-    WfOption<std::string> position{"dock/position"};
+    WfOption<int> entries_per_line{DOCK_SECTION "/max_per_line"};
+    WfOption<std::string> position{DOCK_SECTION "/position"};
 
     // needed as a workaround to shrink down when removing items
-    WfOption<int> height{"dock/minimal_height"};
-    WfOption<int> width{"dock/minimal_width"};
+    WfOption<int> height{DOCK_SECTION "/minimal_height"};
+    WfOption<int> width{DOCK_SECTION "/minimal_width"};
 
   public:
     impl(WayfireOutput *output)
     {
         this->output = output;
         window = std::unique_ptr<WayfireAutohidingWindow>(
-            new WayfireAutohidingWindow(output, "dock"));
+            new WayfireAutohidingWindow(output, DOCK_SECTION));
         window->set_auto_exclusive_zone(false);
         gtk_layer_set_layer(window->gobj(), GTK_LAYER_SHELL_LAYER_TOP);
 
@@ -70,16 +62,6 @@ class WfDock::impl
 
         window->add_css_class("wf-dock");
         window->set_child(layout);
-
-        if (css_path.value() != "")
-        {
-            auto css = load_css_from_path(css_path);
-            if (css)
-            {
-                auto display = Gdk::Display::get_default();
-                Gtk::StyleContext::add_provider_for_display(display, css, GTK_STYLE_PROVIDER_PRIORITY_USER);
-            }
-        }
 
         window->present();
         _wl_surface = gdk_wayland_surface_get_wl_surface(

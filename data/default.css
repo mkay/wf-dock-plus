@@ -1,0 +1,142 @@
+.wf-dock,
+.wf-dock .out-box {
+    background: transparent;
+}
+
+.wf-dock .box {
+    background-color: #33333355;
+    padding-left: 1em;
+    padding-right: 1em;
+    border-radius: 1em;
+}
+
+.wf-dock .dock-separator {
+    background-color: alpha(white, 0.25);
+    min-width: 1px;
+    min-height: 1px;
+    margin: 0.75em 0.5em;
+}
+
+.wf-dock button {
+    background: transparent;
+    padding-left: 0rem;
+    padding-right: 0rem;
+}
+
+/* The places popover is a child of its dock button, so undo the dock icon styling;
+ * the icon size comes from dock-plus/places_icon_size */
+.wf-dock .places-popover image,
+.wf-dock .places-popover image:hover {
+    -gtk-icon-transform: none;
+    transition: none;
+}
+
+/* The window list has no icons; pad its rows to the height of the places rows */
+.wf-dock .app-windows-list row {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.wf-dock button.activated {
+    border-bottom: 3px solid white;
+    margin-bottom: 5px;
+}
+
+.wf-dock image {
+    background: transparent;
+    padding-left: 0rem;
+    padding-right: 0rem;
+    transition: 200ms;
+    -gtk-icon-transform: scale(0.7);
+}
+
+.wf-dock image:hover {
+    background: transparent;
+    padding-left: 0rem;
+    padding-right: 0rem;
+    transition: 200ms;
+    -gtk-icon-transform: scale(1.0);
+}
+
+.wf-dock image.toplevel-icon {
+    animation-name: embiggen;
+    animation-duration: 1000ms;
+    animation-timing-function: linear;
+    animation-iteration-count: 1;
+}
+
+/* Themes may animate background-size and background-image on buttons, e.g. a
+ * click ripple that grows the background to 1000%; markers drawn as background
+ * images would then fill the whole button when clicked or when an app loses focus */
+.wf-dock button,
+.wf-dock button:active {
+    transition: none;
+    animation: none;
+}
+
+/* A dot under apps with open windows; the activated border marks the focused one */
+.wf-dock button.running {
+    background-image: radial-gradient(circle closest-side, alpha(white, 0.8) 60%, transparent 100%);
+    background-size: 5px 5px;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+}
+
+.wf-dock button.launching image {
+    animation-name: launch-bounce;
+    animation-duration: 550ms;
+    animation-timing-function: ease-out;
+    animation-iteration-count: 1;
+}
+
+.wf-dock .closing image {
+    animation-name: kromulent;
+    animation-duration: 1000ms;
+    animation-timing-function: linear;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+
+/* The scale is repeated because the animation overrides the hover scale of
+ * .wf-dock image; launchers are clicked while hovered, so use the hover size. */
+@keyframes launch-bounce {
+    0%, 100% {
+        -gtk-icon-transform: translateY(0px) scale(1.0);
+    }
+
+    50% {
+        -gtk-icon-transform: translateY(-12px) scale(1.0);
+    }
+}
+
+@keyframes embiggen {
+    to {
+        -gtk-icon-size: 64px;
+        -gtk-icon-transform: translateY(0px);
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    from {
+        -gtk-icon-size: 0px;
+        -gtk-icon-transform: translateY(64px);
+        padding-left: 0rem;
+        padding-right: 0rem;
+    }
+}
+
+@keyframes kromulent {
+    from {
+        -gtk-icon-size: 64px;
+        -gtk-icon-transform: translateY(0px);
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    to {
+        -gtk-icon-size: 0px;
+        -gtk-icon-transform: translateY(64px);
+        padding-left: 0rem;
+        padding-right: 0rem;
+    }
+}

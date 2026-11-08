@@ -6,7 +6,6 @@
 #include <wayfire/util/duration.hpp>
 
 #include "wf-option-wrap.hpp"
-#include "wf-popover.hpp"
 
 struct WayfireOutput;
 struct zwf_hotspot_v2;
@@ -46,8 +45,6 @@ class WayfireAutohidingWindow : public Gtk::Window
     WayfireAutohidingWindow& operator =(const WayfireAutohidingWindow&) = delete;
     WayfireAutohidingWindow& operator =(WayfireAutohidingWindow&&) = delete;
 
-    WfOption<bool> force_show_popup;
-
     ~WayfireAutohidingWindow();
     wl_surface *get_wl_surface() const;
 
@@ -68,16 +65,6 @@ class WayfireAutohidingWindow : public Gtk::Window
      *
      * Note that autohide margin isn't taken into account. */
     void set_auto_exclusive_zone(bool has_zone = false);
-
-    void set_active_popover(WayfireMenuWidget& button);
-    bool is_active_popover(WayfireMenuWidget& button);
-    bool has_active_popover();
-    void unset_active_popover();
-
-    /*
-     * Get Active popover or null
-     */
-    WayfireMenuWidget *get_active_popover();
 
     WayfireOutput *get_output()
     {
@@ -138,9 +125,6 @@ class WayfireAutohidingWindow : public Gtk::Window
         panel_callbacks;
     void reinit_ext_hotspots();
     void setup_hotspot();
-
-    sigc::connection popover_hide;
-    WayfireMenuWidget *active_button = nullptr;
 };
 
 

@@ -37,7 +37,7 @@ std::string WayfireShellApp::get_css_config_dir()
 {
     if (cmdline_css.has_value())
     {
-        return cmdline_config.value();
+        return cmdline_css.value();
     }
 
     std::string config_dir;
@@ -51,7 +51,7 @@ std::string WayfireShellApp::get_css_config_dir()
         config_dir = std::string(config_home);
     }
 
-    auto css_directory = config_dir + "/wf-shell/css/";
+    auto css_directory = config_dir + "/wf-dock-plus/css/";
     /* Ensure it exists */
     std::filesystem::create_directories(css_directory);
 
@@ -74,7 +74,7 @@ void WayfireShellApp::on_css_reload()
     }
 
     /* Add one user file */
-    auto custom_css_config = WfOption<std::string>{"panel/css_path"};
+    auto custom_css_config = WfOption<std::string>{DOCK_SECTION "/css_path"};
     std::string custom_css = custom_css_config;
     if (custom_css != "")
     {
@@ -196,7 +196,7 @@ void WayfireShellApp::on_activate()
     activated = true;
     app->hold();
 
-    // load wf-shell if available
+    // bind wayfire-shell if available
     auto gdk_display = gdk_display_get_default();
     auto wl_display  = gdk_wayland_display_get_wl_display(gdk_display);
     if (!wl_display)
@@ -232,21 +232,18 @@ void WayfireShellApp::on_activate()
         sigc::bind<0>(&handle_css_inotify_event, this),
         inotify_css_fd, Glib::IOCondition::IO_IN | Glib::IOCondition::IO_HUP);
 
-    if (!alternative_monitors)
-    {
-        // Hook up monitor tracking
-        auto display = Gdk::Display::get_default();
-        auto monitor_list = display->get_monitors();
-        monitor_list->signal_items_changed().connect(sigc::mem_fun(*this,
-            &WayfireShellApp::output_list_updated));
+    // Hook up monitor tracking
+    auto display = Gdk::Display::get_default();
+    auto monitor_list = display->get_monitors();
+    monitor_list->signal_items_changed().connect(sigc::mem_fun(*this,
+        &WayfireShellApp::output_list_updated));
 
-        // initial monitors
-        int num_monitors = monitor_list->get_n_items();
-        for (int i = 0; i < num_monitors; i++)
-        {
-            auto monitor = std::dynamic_pointer_cast<Gdk::Monitor>(monitor_list->get_object(i));
-            add_output(monitor);
-        }
+    // initial monitors
+    int num_monitors = monitor_list->get_n_items();
+    for (int i = 0; i < num_monitors; i++)
+    {
+        auto monitor = std::dynamic_pointer_cast<Gdk::Monitor>(monitor_list->get_object(i));
+        add_output(monitor);
     }
 }
 
@@ -299,18 +296,6 @@ void WayfireShellApp::output_list_updated(const int pos, const int rem, const in
     for (guint count = 0; count < monitor_list->get_n_items(); count++)
     {
         auto monitor = std::dynamic_pointer_cast<Gdk::Monitor>(monitor_list->get_object(count));
-
-        std::string output_name = monitor->get_connector();
-        if (monitor->get_connector() == live_preview_output_name)
-        {
-            live_preview_output = gdk_wayland_monitor_get_wl_output(monitor->gobj());
-            monitor->signal_invalidate().connect([=]
-            {
-                live_preview_output = nullptr;
-            });
-            continue;
-        }
-
         add_output(monitor);
     }
 }
@@ -365,10 +350,7 @@ std::vector<std::unique_ptr<WayfireOutput>>*WayfireShellApp::get_wayfire_outputs
 }
 
 WayfireShellApp::WayfireShellApp()
-{
-    live_preview_output = nullptr;
-    live_preview_output_name = "live-preview";
-}
+{}
 
 void WayfireShellApp::init_app()
 {
@@ -430,9 +412,4 @@ WayfireOutput::~WayfireOutput()
     {
         zwf_output_v2_destroy(this->output);
     }
-}
-
-sigc::signal<void()> WayfireOutput::toggle_menu_signal()
-{
-    return m_toggle_menu_signal;
 }

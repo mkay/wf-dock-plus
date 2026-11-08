@@ -24,7 +24,7 @@
 
 static std::string get_dock_option(const std::string& name)
 {
-    auto section = WayfireShellApp::get().config.get_section("dock");
+    auto section = WayfireShellApp::get().config.get_section(DOCK_SECTION);
     auto option  = section ? section->get_option_or(name) : nullptr;
     return option ? option->get_value_str() : "";
 }
@@ -829,7 +829,7 @@ void WfDockApps::detach(WfDockWindow& window, bool closing)
     }
 
     auto key = icon->first;
-    WfOption<bool> show_close{"dock/show_close"};
+    WfOption<bool> show_close{DOCK_SECTION "/show_close"};
     if (closing && show_close)
     {
         /* Keep the icon for the close animation, like the window icons upstream */

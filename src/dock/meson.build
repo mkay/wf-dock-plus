@@ -1,5 +1,5 @@
 executable(
-  'wf-dock',
+  'wf-dock-plus',
   [
     'app-group.cpp',
     'dock.cpp',

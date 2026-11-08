@@ -44,13 +44,17 @@ class WfDockApp::impl
     std::map<WayfireOutput*, std::unique_ptr<WfDock>> docks;
 
     zwlr_foreign_toplevel_manager_v1 *toplevel_manager = NULL;
+    /* Created once the config is loaded */
+    std::unique_ptr<WfOption<std::string>> css_path;
 };
 
 void WfDockApp::on_activate()
 {
     WayfireShellApp::on_activate();
-    new CssFromConfigInt("dock/icon_height", ".toplevel-icon {-gtk-icon-size:", "px;}");
-    IconProvider::load_custom_icons("dock");
+    priv->css_path = std::make_unique<WfOption<std::string>>(DOCK_SECTION "/css_path");
+    priv->css_path->set_callback([this] () { on_css_reload(); });
+    new CssFromConfigInt(DOCK_SECTION "/icon_height", ".toplevel-icon {-gtk-icon-size:", "px;}");
+    IconProvider::load_custom_icons(DOCK_SECTION);
 
     /* At this point, wayland connection has been initialized,
      * and hopefully outputs have been created */
@@ -126,7 +130,7 @@ void WfDockApp::handle_new_toplevel(zwlr_foreign_toplevel_handle_v1 *handle)
 void WfDockApp::handle_toplevel_closed(zwlr_foreign_toplevel_handle_v1 *handle)
 {
     priv->toplevels[handle]->close();
-    WfOption<bool> use_close_animations{"dock/show_close"};
+    WfOption<bool> use_close_animations{DOCK_SECTION "/show_close"};
     if (use_close_animations)
     {
         Glib::signal_timeout().connect([=]
@@ -164,7 +168,7 @@ void WfDockApp::create(int argc, char **argv)
 
 std::string WfDockApp::get_application_name()
 {
-    return "org.wayfire.dock";
+    return "de.singular.dockplus";
 }
 
 Gio::Application::Flags WfDockApp::get_extra_application_flags()

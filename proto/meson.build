@@ -1,4 +1,3 @@
-wl_protocol_dir = wayland_protos.get_variable(pkgconfig: 'pkgdatadir', internal: 'pkgdatadir')
 wayland_scanner = find_program('wayland-scanner')
 
 wayland_scanner_code = generator(
@@ -13,21 +12,18 @@ wayland_scanner_client = generator(
 	arguments: ['client-header', '@INPUT@', '@OUTPUT@'],
 )
 
+# wayfire-shell-unstable-v2.xml is a copy of the file Wayfire installs
+# (MIT, https://github.com/WayfireWM/wayfire), bundled so the build doesn't
+# need Wayfire. Update it by hand when Wayfire changes the protocol.
 client_protocols = [
-    [wl_protocol_dir, 'unstable/xdg-output/xdg-output-unstable-v1.xml'],
-    [wl_protocol_dir, 'unstable/linux-dmabuf/linux-dmabuf-unstable-v1.xml'],
-    [wl_protocol_dir, 'staging/ext-foreign-toplevel-list/ext-foreign-toplevel-list-v1.xml'],
-    [wl_protocol_dir, 'staging/ext-image-capture-source/ext-image-capture-source-v1.xml'],
-    [wl_protocol_dir, 'staging/ext-image-copy-capture/ext-image-copy-capture-v1.xml'],
 	'wlr-foreign-toplevel-management-unstable-v1.xml',
-	wayfire.get_pkgconfig_variable('pkgdatadir') / 'unstable' / 'wayfire-shell-unstable-v2.xml',
+	'wayfire-shell-unstable-v2.xml',
 ]
 
 wl_protos_client_src = []
 wl_protos_headers = []
 
-foreach p : client_protocols
-	xml = join_paths(p)
+foreach xml : client_protocols
 	wl_protos_client_src += wayland_scanner_code.process(xml)
 	wl_protos_headers += wayland_scanner_client.process(xml)
 endforeach
