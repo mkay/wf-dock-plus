@@ -185,7 +185,7 @@ void WfDockPlaces::add_place(const std::string& entry)
         file = Gio::File::create_for_path(path);
     } else if (!is_uri)
     {
-        std::cerr << "wf-dock: ignoring place \"" << entry <<
+        std::cerr << "wf-dock-plus: ignoring place \"" << entry <<
             "\": not a path or URI" << std::endl;
         return;
     } else
@@ -300,7 +300,7 @@ void WfDockPlaces::open(int index)
             app->launch_uri(uri, ctx);
         } catch (const Glib::Error& e)
         {
-            std::cerr << "wf-dock: failed to run \"" << cmd << "\" for " << uri <<
+            std::cerr << "wf-dock-plus: failed to run \"" << cmd << "\" for " << uri <<
                 ": " << e.what() << std::endl;
         }
 
@@ -313,7 +313,7 @@ void WfDockPlaces::open(int index)
             Gio::AppInfo::launch_default_for_uri_finish(result);
         } catch (const Glib::Error& e)
         {
-            std::cerr << "wf-dock: failed to open " << uri << ": " << e.what() << std::endl;
+            std::cerr << "wf-dock-plus: failed to open " << uri << ": " << e.what() << std::endl;
         }
     });
 }

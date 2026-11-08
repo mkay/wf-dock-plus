@@ -537,7 +537,7 @@ void WfDockAppGroup::launch()
         app_info->launch(std::vector<Glib::RefPtr<Gio::File>>(), ctx);
     } catch (const Glib::Error& e)
     {
-        std::cerr << "wf-dock: failed to launch " << app_info->get_display_name() <<
+        std::cerr << "wf-dock-plus: failed to launch " << app_info->get_display_name() <<
             ": " << e.what() << std::endl;
         return;
     }
@@ -661,7 +661,7 @@ bool WfDockAppGroup::activate_app_new_window()
                 bus->call_finish(result);
             } catch (const Glib::Error& e)
             {
-                std::cerr << "wf-dock: " << app_id << " didn't open a new window: " <<
+                std::cerr << "wf-dock-plus: " << app_id << " didn't open a new window: " <<
                     e.what() << std::endl;
                 fall_back();
                 return;

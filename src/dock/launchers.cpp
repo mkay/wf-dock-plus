@@ -77,7 +77,7 @@ bool WfDockLauncher::initialize(const std::string& name)
 
     if (!app_info)
     {
-        std::cerr << "wf-dock: no desktop entry or launcher_cmd_" << name <<
+        std::cerr << "wf-dock-plus: no desktop entry or launcher_cmd_" << name <<
             " found for launcher \"" << name << "\"" << std::endl;
         return false;
     }
