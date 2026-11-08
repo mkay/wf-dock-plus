@@ -31,6 +31,68 @@
     transition: none;
 }
 
+/* The places and window list popovers match the dock: translucent dark grey,
+ * rounded, with a hairline border. Without blur behind them, they stay more
+ * opaque than the dock so text over busy windows remains readable. */
+.wf-dock popover.places-popover > contents,
+.wf-dock popover.app-windows-popover > contents {
+    background-color: alpha(#333333, 0.8);
+    color: alpha(white, 0.92);
+    border: 1px solid alpha(white, 0.12);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px alpha(black, 0.35);
+    padding: 6px;
+}
+
+.wf-dock popover.places-popover > arrow,
+.wf-dock popover.app-windows-popover > arrow {
+    background-color: alpha(#333333, 0.8);
+    border: 1px solid alpha(white, 0.12);
+}
+
+.wf-dock .places-list,
+.wf-dock .app-windows-list {
+    background: transparent;
+    color: inherit;
+}
+
+.wf-dock .places-list row,
+.wf-dock .app-windows-list row {
+    background: transparent;
+    border-radius: 6px;
+    outline: none;
+}
+
+.wf-dock .places-list row:hover,
+.wf-dock .app-windows-list row:hover {
+    background-color: alpha(white, 0.08);
+}
+
+/* The first row is selected when a popover opens, for Enter and the arrow
+ * keys. Show the selection only once the keyboard is used, so mouse users see
+ * a single highlight under the pointer. */
+.wf-dock .places-list row:selected,
+.wf-dock .app-windows-list row:selected {
+    background-color: transparent;
+    color: inherit;
+}
+
+.wf-dock .places-list row:selected:focus-visible,
+.wf-dock .app-windows-list row:selected:focus-visible {
+    background-color: alpha(white, 0.16);
+}
+
+.wf-dock .places-list .dim-label,
+.wf-dock .app-windows-list .dim-label {
+    opacity: 0.5;
+}
+
+/* The separator between the windows and the actions */
+.wf-dock .app-windows-list separator {
+    background-color: alpha(white, 0.1);
+    margin: 4px 6px;
+}
+
 /* The window list has no icons; pad its rows to the height of the places rows */
 .wf-dock .app-windows-list row {
     padding-top: 8px;
