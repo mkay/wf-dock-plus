@@ -241,6 +241,12 @@ void WayfireAutohidingWindow::update_position()
         return;
     }
 
+    /* The window keeps its old allocation until it is laid out for the new edge,
+     * so measure its thickness along the old axis. Measuring the new axis would
+     * give the old length, which can move the window entirely off screen; the
+     * compositor then sends no more frames and the animation never finishes. */
+    int thickness = (this->*get_allocated_height_or_width)();
+
     // need different measurements depending on position
     if ((edge == GTK_LAYER_SHELL_EDGE_LEFT) || (edge == GTK_LAYER_SHELL_EDGE_RIGHT))
     {
@@ -251,7 +257,7 @@ void WayfireAutohidingWindow::update_position()
     }
 
     /* When the position changes, show an animation from the new edge. */
-    autohide_animation.animate(-(this->*get_allocated_height_or_width)(), 0);
+    autohide_animation.animate(-thickness, 0);
     start_draw_timer();
     m_show_uncertain();
     setup_hotspot();
