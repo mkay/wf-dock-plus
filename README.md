@@ -74,7 +74,7 @@ The dock window has the `wf-dock` class, so stylesheets written for wf-shell's d
 
 ## History and credits
 
-wf-dock-plus was extracted from [WayfireWM/wf-shell](https://github.com/WayfireWM/wf-shell) through the fork [mkay/wf-shell](https://github.com/mkay/wf-shell) (branch `dock-launchers`, commit `74ecac7`). The git history of the extracted files was kept, so commits from before the extraction were made in wf-shell, by its authors. The wf-shell code is by Ilia Bozhinov, Scott Moreau, trigg and the other wf-shell contributors.
+wf-dock-plus was extracted from [WayfireWM/wf-shell](https://github.com/WayfireWM/wf-shell), keeping the git history of the extracted files. Commits up to `a6c1160` come from before the extraction and were made in wf-shell. The wf-shell code is by Ilia Bozhinov, Scott Moreau, trigg and the other wf-shell contributors.
 
 New code in this project was written with the help of an AI assistant (Claude).
 
