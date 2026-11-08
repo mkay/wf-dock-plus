@@ -2,6 +2,7 @@
 <wf-shell>
 	<plugin name="dock-plus">
 		<_short>Dock Plus</_short>
+		<_long>A dock with pinned launchers, app grouping and a places menu. Pin, move and remove apps by dragging them in the dock.</_long>
 		<category>Shell</category>
 		<option name="css_path" type="string">
 			<_short>CSS Path</_short>
@@ -95,7 +96,7 @@
 		</option>
 		<option name="launchers" type="string">
 			<_short>Launchers</_short>
-			<_long>Space-separated list of applications pinned to the left of the running apps, in order. Windows of a pinned app are grouped into its launcher instead of getting an icon of their own. Each entry is a desktop file id (with or without .desktop), an absolute path to a .desktop file, or a name defined with launcher_cmd_&lt;name&gt;.</_long>
+			<_long>Set by dragging apps in the dock: drag a running app among the launchers to pin it, drag a launcher to move it, drag it out of the dock to remove it. Space-separated desktop file ids, or names of custom launchers below, in dock order. A desktop file id may end in .desktop or be an absolute path to a .desktop file. Windows of a pinned app are grouped into its launcher.</_long>
 			<default></default>
 		</option>
 		<option name="places_button" type="bool">
