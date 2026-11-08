@@ -47,6 +47,9 @@ add_project_arguments(
 
 install_data('metadata/wf-dock-plus.xml', install_dir: metadata_dir)
 install_data('data/default.css', install_dir: resource_dir / 'css')
+# WCM looks for page icons in Wayfire's icon directory before its own
+install_data('data/icons/plugin-dock-plus.svg',
+  install_dir: get_option('prefix') / get_option('datadir') / 'wayfire' / 'icons')
 
 subdir('proto')
 subdir('src')

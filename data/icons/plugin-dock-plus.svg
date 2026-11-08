@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- WCM page icon for wf-dock-plus: a dock bar in the Wayfire logo colors
+     with a plus above it. Frame styled after WCM's shell plugin icons. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.47"/>
+    </linearGradient>
+  </defs>
+  <rect x="2.5" y="3.5" width="27" height="26" rx="2" fill="#8282ff" stroke="#888a85" stroke-width="0.93"/>
+  <rect x="3.5" y="4.5" width="25" height="24" rx="1.4" fill="none" stroke="url(#shine)" stroke-width="0.93" opacity="0.8"/>
+  <path d="M14.2 6.2h3.6v4.4h4.4v3.6h-4.4v4.4h-3.6v-4.4h-4.4v-3.6h4.4z"
+        fill="#fcbd01" stroke="#a75716" stroke-width="0.8" stroke-linejoin="round"/>
+  <rect x="4" y="20.6" width="24" height="6.5" fill="#353535"/>
+  <circle cx="9.5" cy="23.85" r="2.2" fill="#ff3500"/>
+  <circle cx="16" cy="23.85" r="2.2" fill="#ff9100"/>
+  <circle cx="22.5" cy="23.85" r="2.2" fill="#ffec00"/>
+</svg>
