@@ -46,7 +46,7 @@ sudo pacman -U wf-dock-plus-*.pkg.tar.*
 
 ## Running
 
-Start `wf-dock-plus` from the `[autostart]` section of `~/.config/wayfire.ini`. If wf-shell's dock is started there too, the two docks overlap, so remove `wf-dock` from the autostart.
+Start `wf-dock-plus` at login from Wayfire's autostart. In WCM, open the **Autostart** page in the General category and add `wf-dock-plus` as a command (and remove `wf-dock` if you don't want two docks). In `~/.config/wayfire.ini` that is:
 
 ```ini
 [autostart]

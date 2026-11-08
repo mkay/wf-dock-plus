@@ -2,7 +2,7 @@
 <wf-shell>
 	<plugin name="dock-plus">
 		<_short>Dock Plus</_short>
-		<_long>A dock with pinned launchers, app grouping and a places menu. Pin, move and remove apps by dragging them in the dock.</_long>
+		<_long>A dock with pinned launchers, app grouping and a places menu. Pin, move and remove apps by dragging them in the dock. Start it from the Autostart page.</_long>
 		<category>Shell</category>
 		<option name="css_path" type="string">
 			<_short>CSS Path</_short>
