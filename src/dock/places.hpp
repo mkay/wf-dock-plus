@@ -37,5 +37,5 @@ class WfDockPlaces
     void add_place(const std::string& entry);
     void add_bookmarks();
     void open(int index);
-    void set_keyboard_grab(bool grab);
+    void set_popover_open(bool open);
 };

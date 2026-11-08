@@ -55,6 +55,10 @@ class WayfireAutohidingWindow : public Gtk::Window
     /* Returns true if the window should autohide */
     bool should_autohide() const;
 
+    /* While a popover of the window is open, the window stays shown and takes
+     * keyboard input, which it otherwise doesn't */
+    void set_popover_open(bool open);
+
     /* Hide or show the panel after delay milliseconds, if nothing happens
      * in the meantime */
     void schedule_hide(int delay);
@@ -119,6 +123,7 @@ class WayfireAutohidingWindow : public Gtk::Window
     void m_show_uncertain();
 
     bool input_inside_panel = false;
+    bool popover_open = false;
     zwf_hotspot_v2 *edge_hotspot = NULL, *panel_hotspot = NULL;
     std::vector<zwf_hotspot_v2*> adjacent_edges_hotspots;
     std::unique_ptr<WayfireAutohidingWindowHotspotCallbacks> edge_callbacks, adjacent_edge_callbacks,

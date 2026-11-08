@@ -87,7 +87,7 @@ class WfDockAppGroup
     void rebuild_list();
     void activate_row(int index);
     void close_all_windows();
-    void set_keyboard_grab(bool grab);
+    void set_popover_open(bool open);
     void bounce();
     bool activate_app_new_window();
 };

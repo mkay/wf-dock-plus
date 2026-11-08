@@ -10,7 +10,7 @@
 #include <gtkmm/gestureclick.h>
 #include <gtkmm/label.h>
 #include <gtkmm/window.h>
-#include <gtk4-layer-shell.h>
+#include <wf-autohide-window.hpp>
 #include <wayfire/config/types.hpp>
 #include <iostream>
 
@@ -84,14 +84,14 @@ WfDockPlaces::WfDockPlaces()
     button.set_create_popup_func([this] () { rebuild(); });
     popover.signal_show().connect([this] ()
     {
-        set_keyboard_grab(true);
+        set_popover_open(true);
         if (auto row = list.get_row_at_index(0))
         {
             list.select_row(*row);
             row->grab_focus();
         }
     });
-    popover.signal_closed().connect([this] () { set_keyboard_grab(false); });
+    popover.signal_closed().connect([this] () { set_popover_open(false); });
     button.set_popover(popover);
 
     /* Middle click opens the first place without the popover. Ctrl+click can't
@@ -148,14 +148,12 @@ void WfDockPlaces::reload()
     button.set_tooltip_text(label.empty() ? "Places" : label);
 }
 
-/* The dock surface takes no keyboard input; it has to while the popover is open */
-void WfDockPlaces::set_keyboard_grab(bool grab)
+/* Keeps the dock shown and lets it take keyboard input while the popover is open */
+void WfDockPlaces::set_popover_open(bool open)
 {
-    auto window = dynamic_cast<Gtk::Window*>(button.get_root());
-    if (window)
+    if (auto window = dynamic_cast<WayfireAutohidingWindow*>(button.get_root()))
     {
-        gtk_layer_set_keyboard_mode(window->gobj(), grab ?
-            GTK_LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE : GTK_LAYER_SHELL_KEYBOARD_MODE_NONE);
+        window->set_popover_open(open);
     }
 }
 

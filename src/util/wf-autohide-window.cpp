@@ -523,7 +523,21 @@ void WayfireAutohidingWindow::decrease_autohide()
 
 bool WayfireAutohidingWindow::should_autohide() const
 {
-    return autohide_counter && !this->input_inside_panel;
+    return autohide_counter && !this->input_inside_panel && !this->popover_open;
+}
+
+void WayfireAutohidingWindow::set_popover_open(bool open)
+{
+    popover_open = open;
+    gtk_layer_set_keyboard_mode(this->gobj(), open ?
+        GTK_LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE : GTK_LAYER_SHELL_KEYBOARD_MODE_NONE);
+    if (open)
+    {
+        schedule_show(0);
+    } else if (should_autohide())
+    {
+        schedule_hide(autohide_hide_delay);
+    }
 }
 
 bool WayfireAutohidingWindow::m_do_hide()

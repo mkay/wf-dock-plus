@@ -11,7 +11,7 @@
 #include <gtkmm/separator.h>
 #include <gtkmm/window.h>
 #include <gdk/wayland/gdkwayland.h>
-#include <gtk4-layer-shell.h>
+#include <wf-autohide-window.hpp>
 #include <algorithm>
 #include <iostream>
 
@@ -168,14 +168,14 @@ WfDockAppGroup::WfDockAppGroup()
     popover.set_has_arrow(true);
     popover.signal_show().connect([this] ()
     {
-        set_keyboard_grab(true);
+        set_popover_open(true);
         if (auto row = list.get_row_at_index(0))
         {
             list.select_row(*row);
             row->grab_focus();
         }
     });
-    popover.signal_closed().connect([this] () { set_keyboard_grab(false); });
+    popover.signal_closed().connect([this] () { set_popover_open(false); });
     gtk_widget_set_parent(GTK_WIDGET(popover.gobj()), GTK_WIDGET(button.gobj()));
 }
 
@@ -514,14 +514,12 @@ void WfDockAppGroup::close_all_windows()
     }
 }
 
-/* The dock surface takes no keyboard input; it has to while the popover is open */
-void WfDockAppGroup::set_keyboard_grab(bool grab)
+/* Keeps the dock shown and lets it take keyboard input while the popover is open */
+void WfDockAppGroup::set_popover_open(bool open)
 {
-    auto window = dynamic_cast<Gtk::Window*>(button.get_root());
-    if (window)
+    if (auto window = dynamic_cast<WayfireAutohidingWindow*>(button.get_root()))
     {
-        gtk_layer_set_keyboard_mode(window->gobj(), grab ?
-            GTK_LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE : GTK_LAYER_SHELL_KEYBOARD_MODE_NONE);
+        window->set_popover_open(open);
     }
 }
 
