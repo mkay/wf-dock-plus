@@ -479,11 +479,15 @@ void WfDockAppGroup::show_windows()
 }
 
 /* Rows look like the places popover: label and the 1-9 shortcut */
+/* Long window titles, like web pages in a browser, are cut at the end; the
+ * start of a title is what tells windows apart */
+static constexpr int MAX_TITLE_CHARS = 40;
+
 static Gtk::Box *make_row(Gtk::Label& label, int index = 9)
 {
     label.set_xalign(0);
     label.set_hexpand(true);
-    label.set_max_width_chars(60);
+    label.set_max_width_chars(MAX_TITLE_CHARS);
     label.set_ellipsize(Pango::EllipsizeMode::END);
 
     auto box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 8);
@@ -521,6 +525,12 @@ void WfDockAppGroup::rebuild_list()
         if (window->state & WF_TOPLEVEL_STATE_MINIMIZED)
         {
             label->add_css_class("dim-label");
+        }
+
+        /* The full title of a shortened one */
+        if (Glib::ustring(title).size() > MAX_TITLE_CHARS)
+        {
+            label->set_tooltip_text(title);
         }
 
         list.append(*make_row(*label, list_rows.size()));
