@@ -4,6 +4,7 @@
 #include <gdk/wayland/gdkwayland.h>
 #include <gio/gio.h>
 #include <iostream>
+#include <algorithm>
 #include <filesystem>
 #include <memory>
 #include <wayfire/config/file.hpp>
@@ -62,24 +63,26 @@ void WayfireShellApp::on_css_reload()
 {
     clear_css_rules();
     /* Add our defaults */
-    add_css_file((std::string)RESOURCEDIR + "/css/default.css", GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-    /* Add user directory */
-    std::string ext(".css");
+    add_css_file((std::string)RESOURCEDIR + "/css/default.css");
+    /* Add user directory, in name order */
+    std::vector<std::string> user_files;
     for (auto & p : std::filesystem::directory_iterator(get_css_config_dir()))
     {
-        if (p.path().extension() == ext)
+        if (p.path().extension() == ".css")
         {
-            add_css_file(p.path().string(), GTK_STYLE_PROVIDER_PRIORITY_USER);
+            user_files.push_back(p.path().string());
         }
+    }
+
+    std::sort(user_files.begin(), user_files.end());
+    for (auto & file : user_files)
+    {
+        add_css_file(file);
     }
 
     /* Add one user file */
     auto custom_css_config = WfOption<std::string>{DOCK_SECTION "/css_path"};
-    std::string custom_css = custom_css_config;
-    if (custom_css != "")
-    {
-        add_css_file(custom_css, GTK_STYLE_PROVIDER_PRIORITY_USER);
-    }
+    add_css_file(custom_css_config);
 }
 
 void WayfireShellApp::clear_css_rules()
@@ -93,7 +96,11 @@ void WayfireShellApp::clear_css_rules()
     css_rules.clear();
 }
 
-void WayfireShellApp::add_css_file(std::string file, int priority)
+/* All files go in at user priority, the one GTK gives ~/.config/gtk-4.0/gtk.css.
+ * That file often holds a whole theme, which would override the dock's own
+ * rules at any lower priority. At equal priority the provider added last wins,
+ * so the order of the add_css_file calls decides which rules win. */
+void WayfireShellApp::add_css_file(std::string file)
 {
     auto display = Gdk::Display::get_default();
     if (file != "")

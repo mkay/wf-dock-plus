@@ -85,7 +85,7 @@ class WayfireShellApp
     {}
     void on_css_reload();
     void clear_css_rules();
-    void add_css_file(std::string file, int priority);
+    void add_css_file(std::string file);
     virtual Gio::Application::Flags get_extra_application_flags();
     virtual std::string get_application_name() = 0;
     std::vector<std::unique_ptr<WayfireOutput>> *get_wayfire_outputs();
