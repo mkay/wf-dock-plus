@@ -8,6 +8,7 @@
 #include <giomm/appinfo.h>
 #include <giomm/desktopappinfo.h>
 #include <gtkmm/button.h>
+#include <gtkmm/dragsource.h>
 #include <gtkmm/gestureclick.h>
 #include <gtkmm/image.h>
 #include <gtkmm/listbox.h>
@@ -45,6 +46,10 @@ class WfDockAppGroup
     /* Used to start new instances and as the tooltip; may be empty */
     void set_app_info(Glib::RefPtr<Gio::AppInfo> app_info);
     Glib::RefPtr<Gio::AppInfo> get_app_info() const;
+    /* Makes the button draggable, to pin, move or unpin it. name is the
+     * launcher name, or for a running app its desktop id */
+    void set_pin(const std::string& name, bool pinned);
+    const std::string& get_pin_name() const;
 
     void add_window(WfDockWindow *window);
     void remove_window(WfDockWindow *window);
@@ -63,6 +68,9 @@ class WfDockAppGroup
     Gtk::Popover popover;
     Gtk::ListBox list;
     Glib::RefPtr<Gtk::GestureClick> click;
+    Glib::RefPtr<Gtk::DragSource> drag;
+    std::string pin_name;
+    bool pinned = false;
     Glib::RefPtr<Gio::AppInfo> app_info;
     /* In the order they were opened, which is the order clicks cycle through */
     std::vector<WfDockWindow*> windows;

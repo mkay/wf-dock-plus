@@ -28,6 +28,7 @@ static std::string expand_home(const std::string& path)
 
 bool WfDockLauncher::initialize(const std::string& name)
 {
+    this->name = name;
     std::string icon;
     Glib::RefPtr<Gio::AppInfo> app_info;
     auto cmd = get_dock_option("launcher_cmd_" + name);
@@ -92,7 +93,13 @@ bool WfDockLauncher::initialize(const std::string& name)
     IconProvider::image_set_icon(group.get_image(), icon);
     group.get_widget().add_css_class("launcher");
     group.set_app_info(app_info);
+    group.set_pin(name, true);
     return true;
+}
+
+const std::string& WfDockLauncher::get_name() const
+{
+    return name;
 }
 
 /* Window app_ids are compared without case and without a .desktop suffix */
@@ -144,6 +151,7 @@ void WfDockLaunchers::set_orientation(Gtk::Orientation orientation)
 
 void WfDockLaunchers::reload()
 {
+    hide_drop_marker();
     for (auto& launcher : launchers)
     {
         box.remove(launcher->group.get_widget());
@@ -178,4 +186,75 @@ WfDockAppGroup*WfDockLaunchers::find(const std::string& app_id)
     }
 
     return nullptr;
+}
+
+std::string WfDockLaunchers::show_drop_marker(double x, double y, Gtk::Widget& relative_to)
+{
+    double box_x = 0, box_y = 0;
+    relative_to.translate_coordinates(box, x, y, box_x, box_y);
+    bool vertical = box.get_orientation() == Gtk::Orientation::VERTICAL;
+    double pos    = vertical ? box_y : box_x;
+
+    /* In front of the first launcher whose middle is past the pointer, else
+     * behind the last one. The marker is drawn inside the buttons, so showing
+     * it doesn't move them. */
+    WfDockLauncher *before = nullptr;
+    for (auto& launcher : launchers)
+    {
+        auto bounds = launcher->group.get_widget().compute_bounds(box);
+        if (!bounds)
+        {
+            continue;
+        }
+
+        double middle = vertical ? bounds->get_center().get_y() : bounds->get_center().get_x();
+        if (pos < middle)
+        {
+            before = launcher.get();
+            break;
+        }
+    }
+
+    hide_drop_marker();
+    if (before)
+    {
+        marked = &before->group.get_widget();
+        marked->add_css_class("drop-before");
+        return before->get_name();
+    }
+
+    if (!launchers.empty())
+    {
+        marked = &launchers.back()->group.get_widget();
+        marked->add_css_class("drop-after");
+    }
+
+    return "";
+}
+
+void WfDockLaunchers::hide_drop_marker()
+{
+    if (marked)
+    {
+        marked->remove_css_class("drop-before");
+        marked->remove_css_class("drop-after");
+        marked = nullptr;
+    }
+}
+
+void WfDockLaunchers::set_unpinning(const std::string& name, bool unpinning)
+{
+    for (auto& launcher : launchers)
+    {
+        if (launcher->get_name() == name)
+        {
+            if (unpinning)
+            {
+                launcher->group.get_widget().add_css_class("unpinning");
+            } else
+            {
+                launcher->group.get_widget().remove_css_class("unpinning");
+            }
+        }
+    }
 }

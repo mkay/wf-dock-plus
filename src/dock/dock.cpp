@@ -12,9 +12,11 @@
 #include "app-group.hpp"
 #include "launchers.hpp"
 #include "places.hpp"
+#include "pin.hpp"
 #include "../util/gtk-utils.hpp"
 #include "gtkmm/flowbox.h"
 #include "gtkmm/separator.h"
+#include <gtkmm/droptarget.h>
 #include <css-config.hpp>
 
 
@@ -35,6 +37,10 @@ class WfDock::impl
 
     WfOption<int> entries_per_line{DOCK_SECTION "/max_per_line"};
     WfOption<std::string> position{DOCK_SECTION "/position"};
+
+    Glib::RefPtr<Gtk::DropTarget> drop;
+    /* The launcher being dragged over this dock, empty for a running app */
+    std::string dragged_launcher;
 
     // needed as a workaround to shrink down when removing items
     WfOption<int> height{DOCK_SECTION "/minimal_height"};
@@ -61,6 +67,7 @@ class WfDock::impl
         update_separator();
 
         window->add_css_class("wf-dock");
+        setup_drop();
         window->set_child(layout);
 
         window->present();
@@ -120,6 +127,104 @@ class WfDock::impl
         };
         position.set_callback(update_position);
         update_position();
+    }
+
+    /* Dropping an app among the launchers pins it there or moves it there;
+     * dropping a launcher among the running apps unpins it */
+    void setup_drop()
+    {
+        drop = Gtk::DropTarget::create(wf_dock_drag_data_get_type(), Gdk::DragAction::MOVE);
+        drop->set_preload(true);
+        drop->signal_motion().connect([this] (double x, double y)
+        {
+            auto data = dragged();
+            if (!data)
+            {
+                return Gdk::DragAction::MOVE;
+            }
+
+            bool pinning = over_launchers(x, y);
+            if (pinning)
+            {
+                launchers.show_drop_marker(x, y, layout);
+            } else
+            {
+                launchers.hide_drop_marker();
+            }
+
+            dragged_launcher = data->pinned ? data->name : "";
+            if (!dragged_launcher.empty())
+            {
+                launchers.set_unpinning(dragged_launcher, !pinning);
+            }
+
+            return Gdk::DragAction::MOVE;
+        }, false);
+        drop->signal_leave().connect([this] ()
+        {
+            launchers.hide_drop_marker();
+            if (!dragged_launcher.empty())
+            {
+                /* Letting go outside the dock unpins it */
+                launchers.set_unpinning(dragged_launcher, true);
+            }
+        });
+        drop->signal_drop().connect([this] (const Glib::ValueBase& value, double x, double y)
+        {
+            auto data = (WfDockDragData*)g_value_get_boxed(value.gobj());
+            launchers.hide_drop_marker();
+            dragged_launcher.clear();
+            if (!data)
+            {
+                return false;
+            }
+
+            std::string name = data->name;
+            if (over_launchers(x, y))
+            {
+                auto before = launchers.show_drop_marker(x, y, layout);
+                launchers.hide_drop_marker();
+                launcher_config::defer([name, before] () { launcher_config::pin(name, before); });
+                return true;
+            }
+
+            if (data->pinned)
+            {
+                launcher_config::defer([name] () { launcher_config::unpin(name); });
+                return true;
+            }
+
+            /* A running app dropped among the running apps: nothing to do */
+            return false;
+        }, false);
+        layout.add_controller(drop);
+    }
+
+    WfDockDragData *dragged()
+    {
+        /* The C call returns the value itself; gtkmm's get_value() a copy */
+        auto value = gtk_drop_target_get_value(drop->gobj());
+        return (value && G_VALUE_HOLDS(value, wf_dock_drag_data_get_type())) ?
+               (WfDockDragData*)g_value_get_boxed(value) : nullptr;
+    }
+
+    /* Left of the separator (above it on a vertical dock), or anywhere while
+     * the dock has no running apps */
+    bool over_launchers(double x, double y)
+    {
+        if (!separator.get_visible())
+        {
+            return true;
+        }
+
+        auto bounds = separator.compute_bounds(layout);
+        if (!bounds)
+        {
+            return true;
+        }
+
+        bool vertical = layout.get_orientation() == Gtk::Orientation::VERTICAL;
+        return vertical ? (y < bounds->get_center().get_y()) : (x < bounds->get_center().get_x());
     }
 
     void add_child(Gtk::Widget& widget)

@@ -9,6 +9,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/native.h>
 #include <gtkmm/separator.h>
+#include <gtkmm/widgetpaintable.h>
 #include <gtkmm/window.h>
 #include <gdk/wayland/gdkwayland.h>
 #include <wf-autohide-window.hpp>
@@ -17,6 +18,7 @@
 
 #include "app-group.hpp"
 #include "launchers.hpp"
+#include "pin.hpp"
 #include "toplevel.hpp"
 #include "gtk-utils.hpp"
 #include "wf-shell-app.hpp"
@@ -204,6 +206,70 @@ void WfDockAppGroup::set_app_info(Glib::RefPtr<Gio::AppInfo> app_info)
 Glib::RefPtr<Gio::AppInfo> WfDockAppGroup::get_app_info() const
 {
     return app_info;
+}
+
+void WfDockAppGroup::set_pin(const std::string& name, bool pinned)
+{
+    pin_name     = name;
+    this->pinned = pinned;
+    if (drag)
+    {
+        return;
+    }
+
+    /* A drag only starts once the pointer moved a few pixels with the button
+     * held, so clicks and long presses work as before. The dock is the drop
+     * target; a launcher dropped anywhere else is unpinned. */
+    drag = Gtk::DragSource::create();
+    drag->set_actions(Gdk::DragAction::MOVE);
+    drag->signal_prepare().connect([this] (double, double)
+    {
+        WfDockDragData data{(gchar*)pin_name.c_str(), this->pinned};
+        Glib::ValueBase value;
+        value.init(wf_dock_drag_data_get_type());
+        g_value_set_boxed(value.gobj(), &data);
+        return Gdk::ContentProvider::create(value);
+    }, false);
+    drag->signal_drag_begin().connect([this] (const Glib::RefPtr<Gdk::Drag>&)
+    {
+        drag->set_icon(Gtk::WidgetPaintable::create(image),
+            image.get_width() / 2, image.get_height() / 2);
+        button.add_css_class("dragging");
+    });
+    /* The group can be gone by the time the drag ends, e.g. when the app closed
+     * its last window meanwhile; GTK keeps the drag source alive until then */
+    std::weak_ptr<bool> alive = this->alive;
+    drag->signal_drag_end().connect([this, alive] (const Glib::RefPtr<Gdk::Drag>&, bool dropped)
+    {
+        std::string name;
+        bool unpin = false;
+        if (alive.lock())
+        {
+            button.remove_css_class("dragging");
+            button.remove_css_class("unpinning");
+            name  = pin_name;
+            unpin = !dropped && this->pinned;
+        }
+
+        /* After this handler returns: the change rebuilds the buttons */
+        Glib::signal_idle().connect_once([name, unpin] ()
+        {
+            if (unpin)
+            {
+                /* Dropped outside the dock */
+                launcher_config::unpin(name);
+            } else
+            {
+                launcher_config::run_deferred();
+            }
+        });
+    });
+    button.add_controller(drag);
+}
+
+const std::string& WfDockAppGroup::get_pin_name() const
+{
+    return pin_name;
 }
 
 void WfDockAppGroup::add_window(WfDockWindow *window)
@@ -803,6 +869,20 @@ WfDockAppGroup*WfDockApps::group_for(const WfDockWindow& window)
     }
 
     icon.group->set_app_info(info);
+    if (info)
+    {
+        /* Pinning stores the desktop id without the .desktop suffix */
+        auto id = info->get_id();
+        const std::string suffix = ".desktop";
+        if ((id.size() > suffix.size()) &&
+            (id.compare(id.size() - suffix.size(), suffix.size(), suffix) == 0))
+        {
+            id.resize(id.size() - suffix.size());
+        }
+
+        icon.group->set_pin(id, false);
+    }
+
     add_widget(icon.group->get_widget());
     return icon.group.get();
 }

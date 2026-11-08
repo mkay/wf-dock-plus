@@ -97,6 +97,45 @@
     animation-fill-mode: forwards;
 }
 
+/* Dragging apps to pin, move or unpin them. GTK highlights the whole dock as
+ * the drop target; the marker shows where the app goes instead. */
+.wf-dock .box:drop(active) {
+    box-shadow: none;
+}
+
+.wf-dock button.dragging image {
+    opacity: 0.4;
+}
+
+/* Dropping now would unpin the launcher */
+.wf-dock button.unpinning image {
+    opacity: 0.15;
+}
+
+/* Where a dragged app would be pinned: a thin bar in front of or behind a
+ * launcher. It is drawn inside the button, so the launchers don't move while
+ * dragging; the button loses its rounded corners so the bar stays straight. */
+.wf-dock .launchers button.drop-before,
+.wf-dock .launchers button.drop-after {
+    border-radius: 0;
+}
+
+.wf-dock .launchers.horizontal button.drop-before {
+    box-shadow: inset 2px 0 alpha(white, 0.5);
+}
+
+.wf-dock .launchers.horizontal button.drop-after {
+    box-shadow: inset -2px 0 alpha(white, 0.5);
+}
+
+.wf-dock .launchers.vertical button.drop-before {
+    box-shadow: inset 0 2px alpha(white, 0.5);
+}
+
+.wf-dock .launchers.vertical button.drop-after {
+    box-shadow: inset 0 -2px alpha(white, 0.5);
+}
+
 /* The scale is repeated because the animation overrides the hover scale of
  * .wf-dock image; launchers are clicked while hovered, so use the hover size. */
 @keyframes launch-bounce {

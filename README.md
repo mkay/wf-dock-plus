@@ -11,6 +11,7 @@ wf-dock-plus is an unofficial project. It is not affiliated with or endorsed by 
   - **Click** starts the app, brings its last used window to the front, or cycles through its windows. Clicking a focused app with a single window minimizes it.
   - **Middle click** opens a new window, also for single-instance apps like Nautilus. It uses the desktop file's `new-window` action, or else the running app's `app.new-window` action over D-Bus (what Ctrl+Shift+N runs), or else starts the app again.
   - **Right click or a long press** lists the app's windows, with "New Window" and, last, "Close Window" / "Close N Windows", which asks every window to close like its close button. Keys 1–9 pick an entry, except the close one.
+- **Pin, reorder and unpin by dragging:** drag a running app among the launchers to pin it there, drag a launcher to move it, and drag a launcher past the separator or out of the dock to remove it. A bar shows where the app will land, and a launcher fades when letting go would remove it.
 - **Places button** left of the launchers, with a popover of folders: home, any paths or URIs, and the GTK bookmarks. A middle click opens the first one.
 - **Minimize into the dock:** minimizing and restoring animate the window into and out of its dock icon, with Wayfire's minimize animation.
 - **Autohide** at any screen edge, and a launch bounce when a launcher starts an app.
@@ -57,6 +58,8 @@ dock = wf-dock-plus
 ## Configuration
 
 The dock reads the `[dock-plus]` section of `~/.config/wf-shell.ini`, the file wf-shell uses, and reloads it whenever the file changes. In WCM it is the **Dock Plus** page in the Shell category. `wf-dock-plus.ini.example` shows every option.
+
+Pinning, moving and unpinning by dragging changes only the `launchers` line of that section. WCM doesn't notice the change while it is open, and its next save writes back the launchers it loaded, so close WCM before rearranging the dock, or reopen it afterwards.
 
 WCM drops options it doesn't know whenever it saves `wf-shell.ini`, on any page. That includes `icon_mapping_<app_id>`, which sets an icon for an app that doesn't provide one; if you use WCM, give the app a `.desktop` file with an icon instead.
 
