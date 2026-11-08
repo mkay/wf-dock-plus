@@ -188,7 +188,8 @@ WfDockAppGroup*WfDockLaunchers::find(const std::string& app_id)
     return nullptr;
 }
 
-std::string WfDockLaunchers::show_drop_marker(double x, double y, Gtk::Widget& relative_to)
+std::string WfDockLaunchers::show_drop_marker(double x, double y, Gtk::Widget& relative_to,
+    Gtk::Widget *first_running)
 {
     double box_x = 0, box_y = 0;
     relative_to.translate_coordinates(box, x, y, box_x, box_y);
@@ -227,6 +228,10 @@ std::string WfDockLaunchers::show_drop_marker(double x, double y, Gtk::Widget& r
     {
         marked = &launchers.back()->group.get_widget();
         marked->add_css_class("drop-after");
+    } else if (first_running)
+    {
+        marked = first_running;
+        marked->add_css_class("drop-before");
     }
 
     return "";

@@ -212,6 +212,7 @@ void WfDockAppGroup::set_pin(const std::string& name, bool pinned)
 {
     pin_name     = name;
     this->pinned = pinned;
+    update();
     if (drag)
     {
         return;
@@ -314,13 +315,22 @@ void WfDockAppGroup::update()
     set_css_class(button, "activated", activated);
     set_css_class(button, "minimized", all_minimized);
 
+    std::string tooltip;
     if (app_info)
     {
-        button.set_tooltip_text(app_info->get_display_name());
+        tooltip = app_info->get_display_name();
     } else if (auto window = most_recent())
     {
-        button.set_tooltip_text(window->title);
+        tooltip = window->title;
     }
+
+    /* Until the first app is pinned, tell users how pinning works */
+    if (!pinned && !pin_name.empty() && launcher_config::get().empty())
+    {
+        tooltip += "\nDrag to keep in the dock";
+    }
+
+    button.set_tooltip_text(tooltip);
 
     if (popover.is_visible())
     {
@@ -837,6 +847,12 @@ void WfDockApps::reload_launchers()
             window.group = launcher ? launcher : group_for(window);
             window.group->add_window(&window);
         }
+    }
+
+    /* Whether the pinning hint shows depends on the launchers */
+    for (auto& [key, icon] : icons)
+    {
+        icon.group->update();
     }
 }
 

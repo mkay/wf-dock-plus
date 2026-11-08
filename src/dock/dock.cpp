@@ -146,7 +146,7 @@ class WfDock::impl
             bool pinning = over_launchers(x, y);
             if (pinning)
             {
-                launchers.show_drop_marker(x, y, layout);
+                launchers.show_drop_marker(x, y, layout, first_running());
             } else
             {
                 launchers.hide_drop_marker();
@@ -182,7 +182,7 @@ class WfDock::impl
             std::string name = data->name;
             if (over_launchers(x, y))
             {
-                auto before = launchers.show_drop_marker(x, y, layout);
+                auto before = launchers.show_drop_marker(x, y, layout, nullptr);
                 launchers.hide_drop_marker();
                 launcher_config::defer([name, before] () { launcher_config::pin(name, before); });
                 return true;
@@ -198,6 +198,13 @@ class WfDock::impl
             return false;
         }, false);
         layout.add_controller(drop);
+    }
+
+    /* The button of the first running app without a launcher, or nullptr */
+    Gtk::Widget *first_running()
+    {
+        auto child = box.get_child_at_index(0);
+        return child ? child->get_child() : nullptr;
     }
 
     WfDockDragData *dragged()
@@ -235,6 +242,8 @@ class WfDock::impl
 
     void rem_child(Gtk::Widget& widget)
     {
+        /* The drop marker may be on this button */
+        launchers.hide_drop_marker();
         box.remove(widget);
         update_separator();
         window->set_default_size(width, height);

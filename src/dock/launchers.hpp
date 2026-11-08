@@ -43,8 +43,10 @@ class WfDockLaunchers
 
     /* While an app is dragged over the dock: marks where it would be pinned
      * and returns the launcher it would go in front of, empty for the end.
-     * x and y are in the coordinates of relative_to. */
-    std::string show_drop_marker(double x, double y, Gtk::Widget& relative_to);
+     * x and y are in the coordinates of relative_to. Without launchers the
+     * marker goes in front of first_running, where the first one will appear. */
+    std::string show_drop_marker(double x, double y, Gtk::Widget& relative_to,
+        Gtk::Widget *first_running);
     void hide_drop_marker();
     /* Fades the launcher while dropping it would unpin it */
     void set_unpinning(const std::string& name, bool unpinning);
