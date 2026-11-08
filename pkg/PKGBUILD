@@ -1,0 +1,33 @@
+# Local build of wf-dock-plus from the working tree this PKGBUILD lives in,
+# including uncommitted changes. Run makepkg in pkg/. Bump pkgrel for rebuilds
+# without a new commit. The AUR package builds from tagged releases instead.
+
+pkgname=wf-dock-plus
+_repo=$(realpath "$startdir/..")
+pkgver=0.1.0.r207.g17603a0
+pkgrel=1
+pkgdesc='Dock for Wayfire with launchers and a places menu, based on wf-dock'
+arch=(aarch64 x86_64)
+url='https://git.singular.de/mk/wf-dock-plus'
+license=(MIT)
+depends=(gcc-libs glib2 glibc glibmm-2.68 gtk4 gtk4-layer-shell gtkmm-4.0
+         libsigc++-3.0 wayland wf-config)
+makedepends=(git meson)
+
+pkgver() {
+  local version
+  version=$(sed -n "s/^  version: '\(.*\)',$/\1/p" "$_repo/meson.build")
+  printf '%s.r%s.g%s' "$version" \
+    "$(git -C "$_repo" rev-list --count HEAD)" \
+    "$(git -C "$_repo" rev-parse --short=7 HEAD)"
+}
+
+build() {
+  arch-meson "$_repo" build
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "$pkgdir"
+  install -Dm644 "$_repo/LICENSE" -t "$pkgdir/usr/share/licenses/$pkgname"
+}
