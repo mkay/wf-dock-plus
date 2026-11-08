@@ -28,7 +28,15 @@ Made for Wayfire. Also runs on stacking compositors with layer-shell and wlr for
 
 On Wayfire, autohide needs the `wayfire-shell` plugin, which wf-shell needs as well.
 
-## Building
+## Installing
+
+On Arch Linux, install [wf-dock-plus](https://aur.archlinux.org/packages/wf-dock-plus) from the AUR, for example with an AUR helper:
+
+```
+yay -S wf-dock-plus
+```
+
+### Building from source
 
 Build dependencies: meson, a C++17 compiler, `wayland-scanner`, gtkmm-4.0 (4.12 or later), gtk4-layer-shell, wayland-client and [wf-config](https://github.com/WayfireWM/wf-config). Wayfire itself isn't needed: the one Wayfire protocol the dock uses is bundled in `proto/`.
 
@@ -40,7 +48,7 @@ sudo meson install -C build
 
 The WCM page has to go to `/usr/share/wf-shell/metadata/`, where WCM looks for it, so install with the `/usr` prefix.
 
-On Arch, `pkg/PKGBUILD` builds a package from the checkout it lives in:
+To try changes on Arch, `pkg/PKGBUILD` builds a package from the checkout it lives in, including uncommitted changes:
 
 ```
 cd pkg
