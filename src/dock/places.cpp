@@ -1,10 +1,8 @@
-#include <giomm/appinfo.h>
 #include <giomm/file.h>
 #include <glibmm/convert.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/regex.h>
-#include <gdkmm/display.h>
 #include <gtkmm/box.h>
 #include <gtkmm/eventcontrollerkey.h>
 #include <gtkmm/gestureclick.h>
@@ -15,6 +13,7 @@
 #include <iostream>
 
 #include "places.hpp"
+#include "file-manager.hpp"
 #include "gtk-utils.hpp"
 #include "wf-shell-app.hpp"
 
@@ -286,32 +285,5 @@ void WfDockPlaces::open(int index)
 {
     auto uri = places[index].uri;
     popover.popdown();
-    auto ctx = Gdk::Display::get_default()->get_app_launch_context();
-
-    auto cmd = get_dock_option("places_file_manager");
-    if (!cmd.empty())
-    {
-        /* GIO appends the folder URI to a command line without field codes */
-        try {
-            auto app = Gio::AppInfo::create_from_commandline(cmd, "",
-                Gio::AppInfo::CreateFlags::SUPPORTS_URIS);
-            app->launch_uri(uri, ctx);
-        } catch (const Glib::Error& e)
-        {
-            std::cerr << "wf-dock-plus: failed to run \"" << cmd << "\" for " << uri <<
-                ": " << e.what() << std::endl;
-        }
-
-        return;
-    }
-
-    Gio::AppInfo::launch_default_for_uri_async(uri, ctx, [uri] (Glib::RefPtr<Gio::AsyncResult>& result)
-    {
-        try {
-            Gio::AppInfo::launch_default_for_uri_finish(result);
-        } catch (const Glib::Error& e)
-        {
-            std::cerr << "wf-dock-plus: failed to open " << uri << ": " << e.what() << std::endl;
-        }
-    });
+    open_in_file_manager(uri);
 }

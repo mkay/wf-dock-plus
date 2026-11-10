@@ -4,6 +4,7 @@ executable(
     'app-group.cpp',
     'dock.cpp',
     'dock-app.cpp',
+    'file-manager.cpp',
     'launchers.cpp',
     'pin.cpp',
     'places.cpp',
