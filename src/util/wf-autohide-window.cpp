@@ -68,6 +68,30 @@ WayfireAutohidingWindow::WayfireAutohidingWindow(WayfireOutput *output,
     }));
     this->add_controller(pointer_gesture);
 
+    /* A drag from another app, like files dragged to the trash, sends no
+     * pointer events; keep the dock shown while it is over the dock */
+    auto drag_motion = Gtk::DropControllerMotion::create();
+    signals.push_back(drag_motion->signal_enter().connect([=] (double x, double y)
+    {
+        if (this->pending_hide.connected())
+        {
+            this->pending_hide.disconnect();
+        }
+
+        this->input_inside_panel = true;
+        autohide_animation.animate(0);
+        start_draw_timer();
+    }));
+    signals.push_back(drag_motion->signal_leave().connect([=]
+    {
+        this->input_inside_panel = false;
+        if (this->should_autohide())
+        {
+            this->schedule_hide(autohide_hide_delay);
+        }
+    }));
+    this->add_controller(drag_motion);
+
     this->setup_autohide();
 
     this->edge_hotspot_size.set_callback([=] () { this->setup_hotspot(); });
