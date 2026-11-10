@@ -20,6 +20,7 @@ wf-dock-plus is an unofficial project. It is not affiliated with or endorsed by 
 - **Trash button** at the end of the dock, for the freedesktop.org trash that GNOME, KDE and other desktops share. Its icon shows whether the trash is empty, a click opens it in the file manager, files dragged onto it are moved to the trash, launchers dragged onto it are unpinned, and a right click offers to empty it, asking first. It needs gvfs (Nautilus, Thunar and Nemo depend on it) and stays hidden without it.
 - **Minimize into the dock:** minimizing and restoring animate the window into and out of its dock icon, with Wayfire's minimize animation.
 - **Autohide** at any screen edge, and a launch bounce when a launcher starts an app.
+- **Running, focused and minimized apps** are marked out of the box: a dot under running apps, a bar in the theme's accent color under the focused one, and greyed-out icons for minimized apps.
 - **Icons:** running apps prefer their `.desktop` icon, more window icons are resolved than in wf-dock, and `~` works in icon paths.
 - **Configured with WCM** on its own page; changes apply without restarting the dock.
 
@@ -82,7 +83,9 @@ WCM drops options it doesn't know whenever it saves `wf-shell.ini`, on any page.
 
 The dock loads, in this order, its default stylesheet from `/usr/share/wf-dock-plus/css/default.css`, every `.css` file in `~/.config/wf-dock-plus/css/`, and the file named in the `css_path` option. CSS files in that directory reload as soon as they change.
 
-The dock window has the `wf-dock` class, so stylesheets written for wf-shell's dock work unchanged. The trash button has the `trash` class, and `full` while the trash has items. App buttons have the `running` class while the app has windows, `multiple` with more than one window, `activated` while one of them has focus, and `minimized` while all of them are minimized. The launch bounce is the `launch-bounce` animation. `examples/dock-indicator.css` replaces the focused app's underline with a short bar in the GTK theme's accent color (`@accent_bg_color`, which Adwaita-based themes define) and greys out minimized apps.
+The dock window has the `wf-dock` class, so stylesheets written for wf-shell's dock work unchanged. The trash button has the `trash` class, and `full` while the trash has items. App buttons have the `running` class while the app has windows, `multiple` with more than one window, `activated` while one of them has focus, and `minimized` while all of them are minimized. The launch bounce is the `launch-bounce` animation.
+
+By default, a dot marks running apps, a short bar in the GTK theme's accent color (`@accent_bg_color`, which Adwaita-based themes define; white otherwise) marks the focused one, and apps with all their windows minimized are greyed out. Override these rules on the classes above to change them.
 
 ## Moving from wf-dock
 

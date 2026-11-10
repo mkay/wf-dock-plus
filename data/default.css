@@ -109,11 +109,6 @@
     padding-bottom: 8px;
 }
 
-.wf-dock button.activated {
-    border-bottom: 3px solid white;
-    margin-bottom: 5px;
-}
-
 .wf-dock image {
     background: transparent;
     padding-left: 0rem;
@@ -146,12 +141,33 @@
     animation: none;
 }
 
-/* A dot under apps with open windows; the activated border marks the focused one */
+/* Room below the icons for the markers */
+.wf-dock button {
+    padding-bottom: 8px;
+}
+
+/* A dot under apps with open windows */
 .wf-dock button.running {
     background-image: radial-gradient(circle closest-side, alpha(white, 0.8) 60%, transparent 100%);
     background-size: 5px 5px;
     background-position: center bottom;
     background-repeat: no-repeat;
+}
+
+/* A bar in the GTK theme's accent color under the focused app, in place of
+ * the dot. It is drawn in currentColor: with a theme that doesn't define
+ * accent_bg_color, GTK resets color to its initial white, so the bar turns
+ * white instead of vanishing. */
+.wf-dock button.activated {
+    color: @accent_bg_color;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 32px 3px;
+}
+
+/* Apps with all their windows minimized are greyed out */
+.wf-dock button.minimized image {
+    opacity: 0.75;
+    -gtk-icon-filter: grayscale(1);
 }
 
 .wf-dock button.launching image {
