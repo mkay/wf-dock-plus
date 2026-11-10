@@ -8,6 +8,8 @@ wf-dock-plus is an unofficial project. It is not affiliated with or endorsed by 
 
 ![The dock with the window list of Firefox open](gallery/dock-window-list.png)
 
+![The dock with its trash menu open](gallery/dock-trash.png)
+
 ## Features
 
 - **Pinned launchers** left of the running apps, separated by a thin line. Entries are desktop file ids, absolute paths to `.desktop` files, or custom launchers with their own command, icon and label.
