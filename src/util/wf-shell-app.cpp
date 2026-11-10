@@ -1,5 +1,6 @@
 #include "wf-shell-app.hpp"
 #include <glibmm/main.h>
+#include <glibmm/miscutils.h>
 #include <sys/inotify.h>
 #include <gdk/wayland/gdkwayland.h>
 #include <gio/gio.h>
@@ -80,9 +81,14 @@ void WayfireShellApp::on_css_reload()
         add_css_file(file);
     }
 
-    /* Add one user file */
-    auto custom_css_config = WfOption<std::string>{DOCK_SECTION "/css_path"};
-    add_css_file(custom_css_config);
+    /* Add one user file; ~ is the shell's, so expand it here */
+    std::string custom_css = WfOption<std::string>{DOCK_SECTION "/css_path"};
+    if (custom_css.rfind("~/", 0) == 0)
+    {
+        custom_css = Glib::get_home_dir() + custom_css.substr(1);
+    }
+
+    add_css_file(custom_css);
 }
 
 void WayfireShellApp::clear_css_rules()
