@@ -31,11 +31,12 @@
     transition: none;
 }
 
-/* The places and window list popovers match the dock: translucent dark grey,
- * rounded, with a hairline border. Without blur behind them, they stay more
+/* The places, window list and trash popovers match the dock: translucent dark
+ * grey, rounded, with a hairline border. Without blur behind them, they stay more
  * opaque than the dock so text over busy windows remains readable. */
 .wf-dock popover.places-popover > contents,
-.wf-dock popover.app-windows-popover > contents {
+.wf-dock popover.app-windows-popover > contents,
+.wf-dock popover.trash-popover > contents {
     background-color: alpha(#333333, 0.8);
     color: alpha(white, 0.92);
     border: 1px solid alpha(white, 0.12);
@@ -45,26 +46,30 @@
 }
 
 .wf-dock popover.places-popover > arrow,
-.wf-dock popover.app-windows-popover > arrow {
+.wf-dock popover.app-windows-popover > arrow,
+.wf-dock popover.trash-popover > arrow {
     background-color: alpha(#333333, 0.8);
     border: 1px solid alpha(white, 0.12);
 }
 
 .wf-dock .places-list,
-.wf-dock .app-windows-list {
+.wf-dock .app-windows-list,
+.wf-dock .trash-list {
     background: transparent;
     color: inherit;
 }
 
 .wf-dock .places-list row,
-.wf-dock .app-windows-list row {
+.wf-dock .app-windows-list row,
+.wf-dock .trash-list row {
     background: transparent;
     border-radius: 6px;
     outline: none;
 }
 
 .wf-dock .places-list row:hover,
-.wf-dock .app-windows-list row:hover {
+.wf-dock .app-windows-list row:hover,
+.wf-dock .trash-list row:hover {
     background-color: alpha(white, 0.08);
 }
 
@@ -72,18 +77,21 @@
  * keys. Show the selection only once the keyboard is used, so mouse users see
  * a single highlight under the pointer. */
 .wf-dock .places-list row:selected,
-.wf-dock .app-windows-list row:selected {
+.wf-dock .app-windows-list row:selected,
+.wf-dock .trash-list row:selected {
     background-color: transparent;
     color: inherit;
 }
 
 .wf-dock .places-list row:selected:focus-visible,
-.wf-dock .app-windows-list row:selected:focus-visible {
+.wf-dock .app-windows-list row:selected:focus-visible,
+.wf-dock .trash-list row:selected:focus-visible {
     background-color: alpha(white, 0.16);
 }
 
 .wf-dock .places-list .dim-label,
-.wf-dock .app-windows-list .dim-label {
+.wf-dock .app-windows-list .dim-label,
+.wf-dock .trash-list .dim-label {
     opacity: 0.5;
 }
 
@@ -93,8 +101,10 @@
     margin: 4px 6px;
 }
 
-/* The window list has no icons; pad its rows to the height of the places rows */
-.wf-dock .app-windows-list row {
+/* The window list and trash menu have no icons; pad their rows to the height
+ * of the places rows */
+.wf-dock .app-windows-list row,
+.wf-dock .trash-list row {
     padding-top: 8px;
     padding-bottom: 8px;
 }
@@ -167,6 +177,16 @@
 
 .wf-dock button.dragging image {
     opacity: 0.4;
+}
+
+/* Files dragged over the trash: grow the icon as on hover instead of the
+ * theme's drop highlight */
+.wf-dock button.trash:drop(active) {
+    box-shadow: none;
+}
+
+.wf-dock button.trash:drop(active) image {
+    -gtk-icon-transform: scale(1.0);
 }
 
 /* Dropping now would unpin the launcher */

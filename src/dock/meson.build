@@ -9,6 +9,7 @@ executable(
     'pin.cpp',
     'places.cpp',
     'toplevel.cpp',
+    'trash.cpp',
     'toplevel-icon.cpp'
   ],
   dependencies: [

@@ -17,6 +17,7 @@ wf-dock-plus is an unofficial project. It is not affiliated with or endorsed by 
   - **Right click or a long press** lists the app's windows, with "New Window" and, last, "Close Window" / "Close N Windows", which asks every window to close like its close button. Keys 1–9 pick an entry, except the close one.
 - **Pin, reorder and unpin by dragging:** drag a running app among the launchers to pin it there, drag a launcher to move it, and drag a launcher past the separator or out of the dock to remove it. A bar shows where the app will land, and a launcher fades when letting go would remove it.
 - **Places button** left of the launchers, with a popover of folders: home, any paths or URIs, and the GTK bookmarks. A middle click opens the first one.
+- **Trash button** at the end of the dock, for the freedesktop.org trash that GNOME, KDE and other desktops share. Its icon shows whether the trash is empty, a click opens it in the file manager, files dragged onto it are moved to the trash, launchers dragged onto it are unpinned, and a right click offers to empty it, asking first. It needs gvfs (Nautilus, Thunar and Nemo depend on it) and stays hidden without it.
 - **Minimize into the dock:** minimizing and restoring animate the window into and out of its dock icon, with Wayfire's minimize animation.
 - **Autohide** at any screen edge, and a launch bounce when a launcher starts an app.
 - **Icons:** running apps prefer their `.desktop` icon, more window icons are resolved than in wf-dock, and `~` works in icon paths.
@@ -27,6 +28,8 @@ wf-dock-plus is an unofficial project. It is not affiliated with or endorsed by 
 Made for Wayfire. Also runs on stacking compositors with layer-shell and wlr foreign-toplevel support, such as labwc, but without autohide. Not on GNOME or KDE.
 
 On Wayfire, autohide needs the `wayfire-shell` plugin, which wf-shell needs as well.
+
+The trash button needs gvfs, which provides GIO's `trash:///`.
 
 ## Installing
 
@@ -79,7 +82,7 @@ WCM drops options it doesn't know whenever it saves `wf-shell.ini`, on any page.
 
 The dock loads, in this order, its default stylesheet from `/usr/share/wf-dock-plus/css/default.css`, every `.css` file in `~/.config/wf-dock-plus/css/`, and the file named in the `css_path` option. CSS files in that directory reload as soon as they change.
 
-The dock window has the `wf-dock` class, so stylesheets written for wf-shell's dock work unchanged. App buttons have the `running` class while the app has windows, `multiple` with more than one window, `activated` while one of them has focus, and `minimized` while all of them are minimized. The launch bounce is the `launch-bounce` animation. `examples/dock-indicator.css` replaces the focused app's underline with a short bar in the GTK theme's accent color (`@accent_bg_color`, which Adwaita-based themes define) and greys out minimized apps.
+The dock window has the `wf-dock` class, so stylesheets written for wf-shell's dock work unchanged. The trash button has the `trash` class, and `full` while the trash has items. App buttons have the `running` class while the app has windows, `multiple` with more than one window, `activated` while one of them has focus, and `minimized` while all of them are minimized. The launch bounce is the `launch-bounce` animation. `examples/dock-indicator.css` replaces the focused app's underline with a short bar in the GTK theme's accent color (`@accent_bg_color`, which Adwaita-based themes define) and greys out minimized apps.
 
 ## Moving from wf-dock
 

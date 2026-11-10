@@ -2,7 +2,7 @@
 <wf-shell>
 	<plugin name="dock-plus">
 		<_short>Dock Plus</_short>
-		<_long>A dock with pinned launchers, app grouping and a places menu. Pin, move and remove apps by dragging them in the dock. Start it from the Autostart page.</_long>
+		<_long>A dock with pinned launchers, app grouping, a places menu and a trash. Pin, move and remove apps by dragging them in the dock. Start it from the Autostart page.</_long>
 		<category>Shell</category>
 		<option name="css_path" type="string">
 			<_short>CSS Path</_short>
@@ -131,6 +131,26 @@
 			<_short>Places label</_short>
 			<_long>Tooltip of the places button.</_long>
 			<default>Places</default>
+		</option>
+		<option name="trash_button" type="bool">
+			<_short>Trash button</_short>
+			<_long>Show a trash button at the end of the dock. A click opens the trash in the file manager set in Places file manager, files dropped on it are moved to the trash, launchers dropped on it are unpinned, and a right click offers to empty it. Needs gvfs.</_long>
+			<default>false</default>
+		</option>
+		<option name="trash_icon" type="string">
+			<_short>Trash icon</_short>
+			<_long>Icon name or path for the trash button while the trash is empty.</_long>
+			<default>user-trash</default>
+		</option>
+		<option name="trash_icon_full" type="string">
+			<_short>Trash icon (full)</_short>
+			<_long>Icon name or path for the trash button while the trash has items.</_long>
+			<default>user-trash-full</default>
+		</option>
+		<option name="trash_label" type="string">
+			<_short>Trash label</_short>
+			<_long>Tooltip of the trash button.</_long>
+			<default>Trash</default>
 		</option>
 		<option name="custom_launchers" type="dynamic-list" type-hint="dict">
 			<_short>Custom launchers</_short>

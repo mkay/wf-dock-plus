@@ -28,6 +28,14 @@ places_file_manager = nautilus --new-window
 # places_icon_size = 24
 # places_label = Places
 
+# a trash button at the end of the dock (needs gvfs). a click opens the trash
+# with places_file_manager, files and launchers dropped on it are trashed or
+# unpinned, and a right click offers to empty it
+trash_button = true
+# trash_icon = user-trash
+# trash_icon_full = user-trash-full
+# trash_label = Trash
+
 # screen edge: top, bottom, left or right
 # position = bottom
 
