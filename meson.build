@@ -2,7 +2,7 @@ project(
   'wf-dock-plus',
   'c',
   'cpp',
-  version: '0.1.0',
+  version: '0.2.0',
   license: 'MIT',
   meson_version: '>=0.58.0',
   default_options: [
